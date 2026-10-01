@@ -36,8 +36,6 @@ cd my-project
 trace index
 ```
 
-npm automatically installs the matching Windows, Linux or macOS binary for x64 or ARM64. No platform-specific install command is needed.
-
 ## Usage
 
 | Command | What you get |
