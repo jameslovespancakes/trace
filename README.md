@@ -36,6 +36,8 @@ cd my-project
 trace index
 ```
 
+npm automatically installs the matching Windows, Linux or macOS binary for x64 or ARM64. No platform-specific install command is needed.
+
 ## Usage
 
 | Command | What you get |
@@ -158,7 +160,7 @@ Requires Rust 1.92; Windows builds use MSVC or MinGW.
 
 ```sh
 cargo build --release
-cargo nextest run --release --workspace
+cargo nextest run --workspace --cargo-profile ci --profile ci
 ```
 
 [Build and release details](.github/CI.md).

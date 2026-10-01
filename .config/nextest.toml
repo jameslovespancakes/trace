@@ -1,6 +1,6 @@
 # cargo-nextest profiles (DESIGN §4.14 task 8). Run the workspace with
 #   cargo nextest run --release --workspace                 (profile default)
-#   cargo nextest run --release --workspace --profile ci    (CI: + target/nextest/ci/junit.xml)
+#   cargo nextest run --workspace --cargo-profile ci --profile ci (fast CI; target/nextest/ci/junit.xml)
 #   cargo nextest run --release --workspace --profile live  (only the live language-server tests)
 # Never `cargo test` for the whole workspace: it runs the test binaries one after another.
 # Every profile inherits the settings of `default` that it does not override.

@@ -91,6 +91,15 @@ debug = false
 strip = "symbols"
 panic = "unwind"
 
+# Tests do not need release LTO or single-unit code generation.
+[profile.ci]
+inherits = "dev"
+opt-level = 1
+debug = false
+lto = false
+codegen-units = 16
+incremental = false
+
 [profile.dev.package."*"]
 # Grammar C code and dependencies compile optimized even in debug builds (parsing speed in tests).
 opt-level = 2

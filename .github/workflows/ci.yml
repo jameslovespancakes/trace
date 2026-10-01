@@ -1,21 +1,17 @@
 name: CI
 
-# Every push to main and every pull request: Checks -> Tests -> Result.
-#   Changes   changelog checks and changed areas (Rust / npm launcher)
-#   Lint      rustfmt and clippy (Linux, Windows)
-#   npm       unit tests of the npm launcher and packaging
-#   Test      build, the whole test suite and a smoke run (Windows, Linux, macOS)
-#   Result    the single required status check (branch protection)
-# Also reused by release.yml as its gate; there every job runs.
+# Normal Rust changes test three native platforms. Declared main release candidates build six.
+# Documentation and npm-only changes stay lightweight unless they prepare a release.
+# A candidate has a dated workspace-version changelog entry and no existing version tag.
+# A manual main run prepares a candidate when artifacts are missing or expired.
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
-  workflow_call:
 
 concurrency:
-  group: ci-${{ github.ref }}-${{ github.event_name }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -25,156 +21,209 @@ env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
   RUST_BACKTRACE: "1"
-  # No network in tests: no automatic language-server installs (tests that need a server
-  # skip without one).
   TRACE_NO_AUTO_INSTALL: "1"
   RUST_TOOLCHAIN: "1.92.0"
 
 jobs:
   changes:
-    name: Changes
+    name: Checks
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
       pull-requests: read
     outputs:
-      # Empty when the filter did not run (tags, manual runs, release gate): run everything.
-      rust: ${{ steps.filter.outputs.rust || 'true' }}
-      npm: ${{ steps.filter.outputs.npm || 'true' }}
+      rust: ${{ steps.plan.outputs.rust }}
+      release: ${{ steps.plan.outputs.release }}
+      matrix: ${{ steps.plan.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - uses: dorny/paths-filter@v3
         id: filter
-        if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+        if: github.event_name != 'workflow_dispatch'
         with:
           filters: |
             rust:
               - 'crates/**'
               - 'assets/**'
               - 'tests/**'
-              - 'scripts/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'clippy.toml'
+              - '.cargo/**'
               - '.config/**'
               - '.github/workflows/ci.yml'
-            npm:
-              - '.github/npm/**'
-              - '.github/workflows/ci.yml'
+              - '.github/scripts/ci-plan.mjs'
             changelog:
               - 'CHANGELOG.md'
-      - name: Changelog checks
+      - name: Tooling and changelog checks
         run: |
-          node --test .github/tests/changelog.test.mjs
+          node --test .github/tests/*.test.mjs .github/npm/test/*.test.mjs
           node .github/scripts/changelog.mjs
       - name: Require changelog update
         if: steps.filter.outcome == 'success' && steps.filter.outputs.changelog != 'true'
         run: |
           echo "::error::Update CHANGELOG.md for every pull request or main push."
           exit 1
+      - name: Plan
+        id: plan
+        env:
+          RUST_CHANGED: ${{ steps.filter.outputs.rust }}
+        run: node .github/scripts/ci-plan.mjs
 
-  lint:
-    name: Lint (${{ matrix.name }})
+  platforms:
+    name: ${{ matrix.name }}
     needs: changes
     if: needs.changes.outputs.rust == 'true'
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - { name: Linux, os: ubuntu-latest }
-          - { name: Windows, os: windows-latest }
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: lint
-          save-if: ${{ github.ref == 'refs/heads/main' }}
-      - name: Format
-        if: runner.os == 'Linux'
-        run: cargo fmt --all -- --check
-      - name: Clippy
-        run: cargo clippy --release --workspace --all-targets --locked -- -D warnings
-
-  npm:
-    name: npm launcher
-    needs: changes
-    if: needs.changes.outputs.npm == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Unit tests
-        run: node --test .github/npm/test/*.test.mjs
-
-  test:
-    name: Test (${{ matrix.name }})
-    needs: [changes, lint]
-    if: needs.changes.outputs.rust == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { name: Windows, os: windows-latest }
-          - { name: Linux, os: ubuntu-latest }
-          - { name: macOS, os: macos-latest }
+      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    env:
+      TARGET: ${{ matrix.target }}
+      WINDOWS_SIGNING: ${{ secrets.AZURE_CLIENT_ID != '' }}
+      MACOS_SIGNING: ${{ secrets.APPLE_CERTIFICATE_P12 != '' }}
     steps:
       - uses: actions/checkout@v4
-      # Pinned to the workspace rust-version (Cargo.toml); this also enforces the MSRV. On
-      # Windows the grammar scanners compile with the preinstalled Visual Studio cl.exe.
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: ${{ matrix.lint && 'clippy,rustfmt' || '' }}
+          targets: ${{ needs.changes.outputs.release == 'true' && matrix.target || '' }}
+      - name: musl C toolchain
+        if: needs.changes.outputs.release == 'true' && contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
       - uses: Swatinem/rust-cache@v2
         with:
-          key: test
+          shared-key: build
+          key: ${{ matrix.target }}
+          cache-workspace-crates: true
           save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Format and Clippy
+        if: matrix.lint
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --profile ci --workspace --all-targets --locked -- -D warnings
       - uses: taiki-e/install-action@v2
+        if: matrix.tests
         with:
           tool: cargo-nextest
-      - name: Build
-        run: cargo build --release --workspace --locked
       - name: Tests
-        run: cargo nextest run --release --workspace --locked --profile ci
-      - name: Smoke run
+        if: matrix.tests
+        run: cargo nextest run --workspace --locked --cargo-profile ci --profile ci
+      - name: Test binary smoke run
+        if: matrix.tests
         shell: bash
         run: |
-          exe=target/release/trace
+          exe=target/ci/trace
           if [ "$RUNNER_OS" = "Windows" ]; then exe="$exe.exe"; fi
           "$exe" --version
           "$exe" --help > /dev/null
-      - name: Test report
-        if: always()
-        uses: test-summary/action@v2
-        with:
-          paths: target/nextest/ci/junit.xml
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && matrix.tests
         with:
-          name: junit-${{ matrix.name }}
+          name: junit-${{ matrix.target }}
           path: target/nextest/ci/junit.xml
           if-no-files-found: ignore
+          retention-days: 7
+      - name: Shipping binary
+        if: needs.changes.outputs.release == 'true'
+        shell: bash
+        run: |
+          if [[ "$TARGET" == *windows-msvc ]]; then
+            export RUSTFLAGS="-C target-feature=+crt-static"
+          fi
+          cargo build --release --locked --target "$TARGET" -p trace-cli
+      - name: Shipping binary smoke run
+        if: needs.changes.outputs.release == 'true' && matrix.native
+        shell: bash
+        run: |
+          exe="target/$TARGET/release/trace"
+          if [ "$RUNNER_OS" = "Windows" ]; then exe="$exe.exe"; fi
+          "$exe" --version
+          "$exe" --help > /dev/null
+      - name: Sign (Windows Authenticode)
+        if: needs.changes.outputs.release == 'true' && contains(matrix.target, 'windows') && env.WINDOWS_SIGNING == 'true'
+        uses: azure/trusted-signing-action@v0.5.1
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.TRUSTED_SIGNING_PROFILE }}
+          files-folder: target/${{ matrix.target }}/release
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+      - name: Sign and notarize (macOS Developer ID)
+        if: needs.changes.outputs.release == 'true' && contains(matrix.target, 'apple') && env.MACOS_SIGNING == 'true'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          security create-keychain -p "$GITHUB_RUN_ID" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$GITHUB_RUN_ID" "$keychain"
+          echo "$APPLE_CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -d user -s "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$GITHUB_RUN_ID" "$keychain"
+          bin="target/$TARGET/release/trace"
+          codesign --force --options runtime --timestamp --sign "$APPLE_SIGNING_IDENTITY" "$bin"
+          ditto -c -k --keepParent "$bin" "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
+          rm -f "$RUNNER_TEMP/cert.p12"
+      - name: Package candidate
+        if: needs.changes.outputs.release == 'true'
+        shell: bash
+        env:
+          ARCHIVE: ${{ matrix.archive }}
+        run: |
+          version=$(node .github/scripts/release-artifacts.mjs version)
+          bin="target/$TARGET/release/trace"
+          if [[ "$TARGET" == *windows* ]]; then bin="$bin.exe"; fi
+          name="trace-v${version}-$TARGET"
+          mkdir -p release-artifact/bin "dist/$name"
+          cp "$bin" release-artifact/bin/
+          cp "$bin" LICENSE README.md CHANGELOG.md "dist/$name/"
+          cd dist
+          if [ "$ARCHIVE" = "zip" ]; then
+            7z a -tzip "../release-artifact/$name.zip" "$name" > /dev/null
+          else
+            tar czf "../release-artifact/$name.tar.gz" "$name"
+          fi
+          cd ..
+          node .github/scripts/release-artifacts.mjs record
+      - uses: actions/upload-artifact@v4
+        if: needs.changes.outputs.release == 'true'
+        with:
+          name: release-${{ matrix.target }}
+          path: release-artifact/
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
 
   result:
     name: Result
-    needs: [changes, lint, npm, test]
+    needs: [changes, platforms]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Summary
-        shell: bash
         env:
           NEEDS: ${{ toJSON(needs) }}
         run: |
@@ -183,5 +232,4 @@ jobs:
             echo "| --- | --- |"
             echo "$NEEDS" | jq -r 'to_entries[] | "| \(.key) | \(.value.result) |"'
           } >> "$GITHUB_STEP_SUMMARY"
-          # Skipped = nothing in that area changed; anything else must succeed.
           echo "$NEEDS" | jq -e 'all(.[]; .result == "success" or .result == "skipped")' > /dev/null
