@@ -6,7 +6,7 @@
 // `bin-<target>/trace` (`trace.exe` on Windows). Writes <out>/<platform key>/ (one package per
 // platform: package.json with `os` / `cpu`, bin/<binary>, LICENSE) and <out>/trace/ (the
 // launcher: bin/, lib/, package.json with the version and every platform package as an
-// optional dependency, README.md, LICENSE). Every platform must have its binary.
+// optional dependency, README.md, CHANGELOG.md, LICENSE). Every platform must have its binary.
 
 import { chmodSync, copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -67,6 +67,7 @@ export function pack({ version, binaries, out, template = TEMPLATE, repo = REPO 
   if (existsSync(license)) copyFileSync(license, join(main, "LICENSE"));
   const readme = join(repo, "README.md");
   if (existsSync(readme)) copyFileSync(readme, join(main, "README.md"));
+  copyFileSync(join(repo, "CHANGELOG.md"), join(main, "CHANGELOG.md"));
   const manifest = {
     ...base,
     version,

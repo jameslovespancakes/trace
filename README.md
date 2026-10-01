@@ -20,7 +20,8 @@ Source, callers, dependencies and call paths for developers and AI agents.</p>
   <a href="#usage">Usage</a> ·
   <a href="#results">Results</a> ·
   <a href="#languages">Languages</a> ·
-  <a href="#methodology">Methodology</a>
+  <a href="#methodology">Methodology</a> ·
+  <a href="CHANGELOG.md">Changelog</a>
 </p>
 
 trace is a read-only CLI that maps code and its relationships for AI agents.

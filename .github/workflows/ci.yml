@@ -1,7 +1,7 @@
 name: CI
 
 # Every push to main and every pull request: Checks -> Tests -> Result.
-#   Changes   what changed (Rust / npm launcher); unchanged areas are skipped, never failed
+#   Changes   changelog checks and changed areas (Rust / npm launcher)
 #   Lint      rustfmt and clippy (Linux, Windows)
 #   npm       unit tests of the npm launcher and packaging
 #   Test      build, the whole test suite and a smoke run (Windows, Linux, macOS)
@@ -62,6 +62,17 @@ jobs:
             npm:
               - '.github/npm/**'
               - '.github/workflows/ci.yml'
+            changelog:
+              - 'CHANGELOG.md'
+      - name: Changelog checks
+        run: |
+          node --test .github/tests/changelog.test.mjs
+          node .github/scripts/changelog.mjs
+      - name: Require changelog update
+        if: steps.filter.outcome == 'success' && steps.filter.outputs.changelog != 'true'
+        run: |
+          echo "::error::Update CHANGELOG.md for every pull request or main push."
+          exit 1
 
   lint:
     name: Lint (${{ matrix.name }})

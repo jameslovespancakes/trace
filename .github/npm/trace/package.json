@@ -23,7 +23,8 @@
   },
   "files": [
     "bin/",
-    "lib/"
+    "lib/",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=18"

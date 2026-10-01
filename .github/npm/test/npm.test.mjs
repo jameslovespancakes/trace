@@ -69,6 +69,8 @@ test("rule_pack_writes_one_package_per_platform_and_the_launcher", () => {
     assert.equal(Object.keys(main.optionalDependencies).length, 6);
     for (const v of Object.values(main.optionalDependencies)) assert.equal(v, "0.9.0-beta.1");
     assert.ok(existsSync(join(out, "trace", "lib", "platform.js")));
+    assert.ok(main.files.includes("CHANGELOG.md"));
+    assert.equal(readFileSync(join(out, "trace", "CHANGELOG.md"), "utf8"), readFileSync(resolve(HERE, "../../..", "CHANGELOG.md"), "utf8"));
     const win = JSON.parse(readFileSync(join(out, "win32-x64", "package.json"), "utf8"));
     assert.equal(win.name, `${main.name}-win32-x64`);
     assert.deepEqual([win.os, win.cpu], [["win32"], ["x64"]]);

@@ -4,7 +4,7 @@ name: Release
 # the same binaries attached to a GitHub release (archives, SHA256SUMS, build provenance).
 #
 #   Gate      the full CI (Lint, Test on every OS)
-#   Version   the tag must equal the workspace version in Cargo.toml
+#   Version   the tag must match Cargo.toml and a dated changelog entry
 #   Build     six targets: Windows x64 / ARM64, Linux x64 / ARM64 (static), macOS ARM64 / x64
 #   Publish   npm (provenance) and the GitHub release, in parallel
 #   Summary   what was released and how to install it
@@ -64,6 +64,7 @@ jobs:
               echo "::error::Tag $GITHUB_REF_NAME does not match the workspace version $crate in Cargo.toml."
               exit 1
             fi
+            node .github/scripts/changelog.mjs "$version" > /dev/null
             publish=true
           else
             version="$crate-dev.$GITHUB_RUN_NUMBER"
@@ -176,7 +177,7 @@ jobs:
           # Archive for the GitHub release.
           name="trace-v${VERSION}-${{ matrix.target }}"
           mkdir -p "dist/$name"
-          cp "$bin" LICENSE README.md "dist/$name/"
+          cp "$bin" LICENSE README.md CHANGELOG.md "dist/$name/"
           cd dist
           if [ "${{ matrix.archive }}" = "zip" ]; then
             7z a -tzip "$name.zip" "$name" > /dev/null
@@ -262,9 +263,11 @@ jobs:
         run: |
           package=$(node -p "require('./.github/npm/trace/package.json').name")
           {
-            echo "Install:"
+            node .github/scripts/changelog.mjs "$VERSION"
             echo
-            echo '```'
+            echo "## Install"
+            echo
+            echo '```sh'
             echo "npm install -g ${package}@${VERSION}"
             echo '```'
             echo
@@ -273,7 +276,7 @@ jobs:
           flags=()
           if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
           gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" \
-            --title "trace $VERSION" --notes-file notes.md --generate-notes "${flags[@]}"
+            --title "trace $VERSION" --notes-file notes.md --verify-tag "${flags[@]}"
 
   summary:
     name: Summary
