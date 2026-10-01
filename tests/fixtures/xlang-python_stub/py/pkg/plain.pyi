@@ -1,0 +1,3 @@
+"""Fixture (P5, python_stub): negative control, a stub beside its Python source."""
+
+def version() -> str: ...

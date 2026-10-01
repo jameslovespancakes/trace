@@ -1,0 +1,120 @@
+{
+  "schema": 2,
+  "backends": [
+    {
+      "id": "lsp:haskell-language-server",
+      "kind": "lsp",
+      "languages": [
+        "haskell"
+      ],
+      "language_ids": [
+        "haskell"
+      ],
+      "server": {
+        "name": "haskell-language-server",
+        "version": "2.14.0.0",
+        "license": "Apache-2.0"
+      },
+      "executable": {
+        "from": "toolchain",
+        "ecosystem": "haskell",
+        "paths": [
+          "bin/haskell-language-server-for-this-ghc"
+        ]
+      },
+      "args": [
+        "--lsp"
+      ],
+      "env_allow": [
+        "CABAL_DIR",
+        "CABAL_CONFIG",
+        "STACK_ROOT",
+        "GHCUP_INSTALL_BASE_PREFIX",
+        "GHCUP_USE_XDG_DIRS",
+        "XDG_CONFIG_HOME",
+        "XDG_DATA_HOME",
+        "XDG_STATE_HOME",
+        "XDG_CACHE_HOME",
+        "LANG",
+        "LC_ALL"
+      ],
+      "env_set": {
+        "HIE_BIOS_CACHE_DIR": "{outside}/hls/hie-bios",
+        "HTTP_PROXY": "http://127.0.0.1:9",
+        "HTTPS_PROXY": "http://127.0.0.1:9",
+        "http_proxy": "http://127.0.0.1:9",
+        "https_proxy": "http://127.0.0.1:9",
+        "TEMP": "{tmp}",
+        "TMP": "{tmp}",
+        "TMPDIR": "{tmp}"
+      },
+      "settings": {
+        "haskell": {
+          "checkProject": true,
+          "formattingProvider": "none",
+          "maxCompletions": 0,
+          "plugin": {
+            "hlint": {
+              "globalOn": false
+            },
+            "eval": {
+              "globalOn": false
+            },
+            "stan": {
+              "globalOn": false
+            },
+            "importLens": {
+              "globalOn": false
+            },
+            "rename": {
+              "globalOn": false
+            }
+          }
+        }
+      },
+      "workspace": {
+        "mode": "mirror",
+        "exclude": [
+          "dist-newstyle/**",
+          "**/dist-newstyle/**",
+          ".stack-work/**",
+          "**/.stack-work/**"
+        ]
+      },
+      "ready": {
+        "kind": "progress"
+      },
+      "requires_build": {
+        "tool": "cabal",
+        "runs": "this project's Setup scripts and Template Haskell code",
+        "when": "decided_by_hooks"
+      },
+      "toolchain": {
+        "ecosystem": "haskell",
+        "needs": "GHC (with cabal)",
+        "install": "Install them with GHCup from https://www.haskell.org/ghcup/"
+      },
+      "deps": {
+        "ecosystem": "haskell"
+      },
+      "install": {
+        "id": "haskell-language-server",
+        "version": "2.14.0.0",
+        "license": "Apache-2.0",
+        "display": "Haskell language server",
+        "product": "haskell-language-server",
+        "recipe": "ghcup",
+        "hls_version": "2.14.0.0",
+        "supported_ghc": [
+          "9.6.7",
+          "9.8.4",
+          "9.10.3",
+          "9.12.2",
+          "9.12.4",
+          "9.14.1"
+        ]
+      },
+      "safety": "cabal configures the project's packages (Setup.hs, configure scripts, preprocessors) and GHC runs Template Haskell splices inside the server: mirror workspace, build approval decided by hooks (cabal/Stack projects always, loose files with Template Haskell). Offline: generated cabal.project.local with offline: True (never the user's), HTTP(S) proxies pointed at a closed local port, never cabal update. The server binary is the toolchain's haskell-language-server-<ghc> for exactly the project's GHC, located by the preflight (Prepared var server_executable)."
+    }
+  ]
+}

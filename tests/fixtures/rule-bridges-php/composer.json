@@ -1,0 +1,6 @@
+{
+  "name": "demo/rule-bridges-php",
+  "require": {
+    "laravel/framework": "11.5.0"
+  }
+}

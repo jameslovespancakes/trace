@@ -1,0 +1,7 @@
+[package]
+name = "ignore"
+version = "0.1.0"
+edition.workspace = true
+
+[dev-dependencies]
+grep-printer = { workspace = true }

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "language": "cpp",
+  "runtime": "C++ standard library (libstdc++, libc++, MSVC STL headers); only unconstrained templates whose callable parameter has no type",
+  "conventions": "Symbols are std:: qualified names without inline namespaces (std::__1::, std::_V2::). Every function-object argument of a std algorithm is invoked, so the rows select {\"rest\": 0}: only arguments that are functions are callbacks.",
+  "roots": ["std"],
+  "prelude": [],
+  "function_types": ["std::function", "std::move_only_function", "std::copyable_function", "std::function_ref", "std::invocable", "std::regular_invocable", "std::predicate", "std::relation", "std::equivalence_relation", "std::strict_weak_order", "std::indirect_unary_predicate", "std::indirect_binary_predicate", "std::indirectly_unary_invocable", "std::indirectly_regular_unary_invocable", "std::indirect_strict_weak_order", "std::indirect_equivalence_relation"],
+  "top_types": ["void *", "auto", "..."],
+  "wrapper_types": ["std::optional", "std::reference_wrapper"],
+  "data_types": [],
+  "entries": [
+    {"symbol": "std::sort", "aliases": ["std::stable_sort", "std::partial_sort", "std::partial_sort_copy", "std::nth_element", "std::is_sorted", "std::is_sorted_until", "std::lower_bound", "std::upper_bound", "std::equal_range", "std::binary_search", "std::merge", "std::inplace_merge", "std::min_element", "std::max_element", "std::minmax_element", "std::make_heap", "std::push_heap", "std::pop_heap", "std::sort_heap", "std::is_heap", "std::lexicographical_compare", "std::set_union", "std::set_intersection", "std::set_difference", "std::set_symmetric_difference", "std::includes", "std::next_permutation", "std::prev_permutation"], "kind": "function",
+     "effects": [{"calls": {"rest": 0}}], "basis": "untyped",
+     "describe": "comparison algorithms call the comparator argument", "why": "the comparator is an unconstrained template parameter (Compare): its declared type says nothing, and the call sits in library-internal helpers of the headers"},
+    {"symbol": "std::for_each", "aliases": ["std::for_each_n", "std::transform", "std::generate", "std::generate_n", "std::find_if", "std::find_if_not", "std::count_if", "std::all_of", "std::any_of", "std::none_of", "std::remove_if", "std::remove_copy_if", "std::replace_if", "std::replace_copy_if", "std::copy_if", "std::partition", "std::stable_partition", "std::partition_copy", "std::partition_point", "std::is_partitioned", "std::adjacent_find", "std::mismatch", "std::equal", "std::search", "std::search_n", "std::find_end", "std::find_first_of", "std::unique", "std::unique_copy", "std::accumulate", "std::reduce", "std::transform_reduce", "std::inner_product", "std::partial_sum", "std::inclusive_scan", "std::exclusive_scan", "std::transform_inclusive_scan", "std::transform_exclusive_scan", "std::adjacent_difference"], "kind": "function",
+     "effects": [{"calls": {"rest": 0}}], "basis": "untyped",
+     "describe": "algorithms call their function-object arguments (predicate, operation, generator)", "why": "the callable is an unconstrained template parameter (Pred, Fn, BinaryOp): its declared type says nothing"},
+    {"symbol": "std::thread", "aliases": ["std::jthread"], "kind": "constructor", "effects": [{"stored_then_called": {"pos": 0}}], "basis": "untyped",
+     "describe": "std::thread(f, args...) runs f on a new thread", "why": "f is an unconstrained template parameter; clangd also picks the wrong constructor overload"},
+    {"symbol": "std::async", "kind": "function", "effects": [{"calls": {"pos": 0}}, {"calls": {"pos": 1}}], "basis": "untyped",
+     "describe": "std::async([policy,] f, args...) runs f now or later", "why": "f is an unconstrained template parameter"},
+    {"symbol": "std::invoke", "aliases": ["std::invoke_r", "std::apply", "std::visit"], "kind": "function", "effects": [{"calls": {"pos": 0}}], "basis": "untyped",
+     "describe": "invoke/apply/visit call their first argument now", "why": "the callable is an unconstrained template parameter"},
+    {"symbol": "std::call_once", "kind": "function", "effects": [{"calls": {"pos": 1}}], "basis": "untyped",
+     "describe": "call_once(flag, f, args...) calls f once", "why": "f is an unconstrained template parameter"},
+    {"symbol": "std::bind", "aliases": ["std::bind_front", "std::bind_back"], "kind": "function", "effects": [{"partial": {"pos": 0}}], "basis": "untyped",
+     "describe": "bind(f, args...) returns a wrapper that calls f", "why": "f is an unconstrained template parameter"},
+    {"symbol": "std::function", "aliases": ["std::move_only_function", "std::copyable_function"], "kind": "constructor", "effects": [{"returns": {"pos": 0}}], "basis": "untyped",
+     "describe": "std::function(f) wraps f; calling the wrapper calls f", "why": "the constructor takes an unconstrained template parameter and clangd picks the wrong overload"},
+    {"symbol": "std::packaged_task", "kind": "constructor", "effects": [{"wraps": {"pos": 0}}], "basis": "untyped",
+     "describe": "packaged_task(f): calling the task calls f", "why": "f is an unconstrained template parameter"},
+    {"symbol": "std::condition_variable::wait", "aliases": ["std::condition_variable::wait_for", "std::condition_variable::wait_until", "std::condition_variable_any::wait"], "kind": "method", "effects": [{"calls": "last"}], "basis": "untyped",
+     "describe": "cv.wait(lock, pred) calls the predicate until it is true", "why": "pred is an unconstrained template parameter"},
+    {"symbol": "std::unique_ptr", "aliases": ["std::shared_ptr"], "kind": "constructor", "effects": [{"stored_then_called": {"pos": 1}}], "basis": "untyped",
+     "describe": "a smart pointer constructed with a deleter calls it when the object is released", "why": "the deleter is an unconstrained template parameter"},
+    {"symbol": "std::optional::transform", "aliases": ["std::optional::and_then", "std::optional::or_else", "std::expected::transform", "std::expected::and_then", "std::expected::or_else", "std::expected::transform_error"], "kind": "method", "effects": [{"calls": {"pos": 0}}], "basis": "untyped",
+     "describe": "monadic operations call the function argument when the value (or error) is present", "why": "the function is an unconstrained template parameter"}
+  ],
+  "test_conventions": [
+    {"pattern": "TEST(suite, name)", "activated_by": "gtest", "why_not_derivable": "reflection",
+     "describe": "GoogleTest registers TEST/TEST_F/TEST_P bodies in a static registry run by RUN_ALL_TESTS"},
+    {"pattern": "TEST_CASE(\"name\")", "activated_by": "catch2", "why_not_derivable": "reflection",
+     "describe": "Catch2 registers TEST_CASE bodies in a static registry"}
+  ],
+  "syntax_conventions": [
+    {"rule": "addon_export_member", "bridge": "napi", "symbol": "Napi::Object::Set", "why_not_derivable": "generated_code",
+     "describe": "exports.Set(\"name\", Napi::Function::New(env, fn)) exports fn to JavaScript as name"},
+    {"rule": "addon_function_constructor", "bridge": "napi", "symbol": "Napi::Function::New", "why_not_derivable": "generated_code",
+     "describe": "Napi::Function::New(env, fn) wraps fn in a JavaScript function through a trampoline the compiler instantiates from a template"}
+  ]
+}

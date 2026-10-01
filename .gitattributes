@@ -1,0 +1,33 @@
+# Every text file is stored and checked out with LF line endings.
+* text=auto eol=lf
+
+# Binary files: never converted, never diffed as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tgz binary
+*.xz binary
+*.7z binary
+*.tar binary
+*.jar binary
+*.class binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.a binary
+*.lib binary
+*.o binary
+*.obj binary
+*.pdb binary
+*.wasm binary
+*.bin binary
+*.woff binary
+*.woff2 binary
+*.ttf binary

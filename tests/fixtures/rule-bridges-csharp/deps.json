@@ -1,0 +1,4 @@
+{
+  "install": [{"argv": ["dotnet", "restore", "Api/Api.csproj"]}],
+  "expect": "ok"
+}

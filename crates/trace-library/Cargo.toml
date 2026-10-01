@@ -1,0 +1,27 @@
+[package]
+name = "trace-library"
+description = "Library behaviour for trace: derived from installed library source, declared function types and tiny native tables (never executed)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+trace-core.workspace = true
+trace-syntax.workspace = true
+trace-env.workspace = true
+# Typed dispatch and decorator metadata evaluation walk syntax trees (`derive::typed`,
+# `decorator_meta`).
+tree-sitter.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+postcard.workspace = true
+blake3.workspace = true
+thiserror.workspace = true
+rayon.workspace = true
+# `-sources.jar` / JDK `src.zip` archives read in place (same pin as trace-semantic).
+zip = { version = "=2.4.2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tempfile.workspace = true

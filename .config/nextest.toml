@@ -1,0 +1,30 @@
+# cargo-nextest profiles (DESIGN §4.14 task 8). Run the workspace with
+#   cargo nextest run --release --workspace                 (profile default)
+#   cargo nextest run --release --workspace --profile ci    (CI: + target/nextest/ci/junit.xml)
+#   cargo nextest run --release --workspace --profile live  (only the live language-server tests)
+# Never `cargo test` for the whole workspace: it runs the test binaries one after another.
+# Every profile inherits the settings of `default` that it does not override.
+
+[profile.default]
+# Report every failing test of a run, not only the first one.
+fail-fast = false
+# A test is reported as slow after 60 s and stopped after 5 periods (5 minutes).
+slow-timeout = { period = "60s", terminate-after = 5 }
+
+[profile.ci]
+fail-fast = false
+slow-timeout = { period = "60s", terminate-after = 5 }
+# Keep the full output of failing tests in the log; CI uploads the JUnit report per OS.
+failure-output = "immediate-final"
+
+[profile.ci.junit]
+# Relative to the profile's store directory: target/nextest/ci/junit.xml.
+path = "junit.xml"
+
+[profile.live]
+# Tests that start real language servers (installed tools, real repositories). They are named
+# `*live*` or `rule_live_*`; everything else runs in the default profile.
+default-filter = "test(/live|rule_live/)"
+fail-fast = false
+# Language servers need minutes for a cold start (jdtls, Metals, HLS): stop after 300 s x 2.
+slow-timeout = { period = "300s", terminate-after = 2 }

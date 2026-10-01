@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "backends": [
+    {
+      "id": "lsp:clangd",
+      "kind": "lsp",
+      "languages": [
+        "c",
+        "cpp"
+      ],
+      "language_ids": [
+        "c",
+        "cpp"
+      ],
+      "server": {
+        "name": "clangd",
+        "version": "22.1.6",
+        "license": "Apache-2.0 WITH LLVM-exception"
+      },
+      "executable": {
+        "from": "tool",
+        "tool": "clangd",
+        "path": "bin/clangd"
+      },
+      "args": [
+        "--background-index=true",
+        "--background-index-priority=normal",
+        "--clang-tidy=false",
+        "--enable-config=false",
+        "--header-insertion=never",
+        "--pch-storage=memory",
+        "--log=error",
+        "--compile-commands-dir={outside}/cdb",
+        "--query-driver={query_driver}"
+      ],
+      "env_set": {
+        "TEMP": "{tmp}",
+        "TMP": "{tmp}",
+        "TMPDIR": "{tmp}"
+      },
+      "workspace": {
+        "mode": "mirror"
+      },
+      "ready": {
+        "kind": "none"
+      },
+      "requires_build": {
+        "tool": "CMake",
+        "runs": "this project's build scripts",
+        "when": "decided_by_hooks"
+      },
+      "toolchain": {
+        "ecosystem": "cfamily",
+        "needs": "a C/C++ compiler",
+        "install": "Install Visual Studio Build Tools (Windows), gcc or clang (Linux) or the Xcode Command Line Tools (macOS)"
+      },
+      "deps": {
+        "ecosystem": "cfamily"
+      },
+      "install": {
+        "id": "clangd",
+        "version": "22.1.6",
+        "license": "Apache-2.0 WITH LLVM-exception",
+        "display": "C/C++ language server",
+        "product": "clangd",
+        "recipe": "archive",
+        "artifacts": [
+          {
+            "platform": "windows-x86_64",
+            "url": "https://github.com/clangd/clangd/releases/download/22.1.6/clangd-windows-22.1.6.zip",
+            "sha256": "ce54f16e0b4fd76d450eeda9664420b195360b73febcfe40e661108fa57f2ce1",
+            "strip": 1
+          },
+          {
+            "platform": "linux-x86_64",
+            "url": "https://github.com/clangd/clangd/releases/download/22.1.6/clangd-linux-22.1.6.zip",
+            "sha256": "a9c77443af2e447ed467e84771848d3a6ac1c56f84bcfcde717e66318de77cfa",
+            "strip": 1
+          },
+          {
+            "platform": "macos-x86_64",
+            "url": "https://github.com/clangd/clangd/releases/download/22.1.6/clangd-mac-22.1.6.zip",
+            "sha256": "631aef462556cbd74e0ebaae1778a38d1997d0ba3371652ca54f82652a179e7d",
+            "strip": 1
+          },
+          {
+            "platform": "macos-aarch64",
+            "url": "https://github.com/clangd/clangd/releases/download/22.1.6/clangd-mac-22.1.6.zip",
+            "sha256": "631aef462556cbd74e0ebaae1778a38d1997d0ba3371652ca54f82652a179e7d",
+            "strip": 1
+          }
+        ],
+        "executables": [
+          "bin/clangd"
+        ]
+      },
+      "safety": "clangd runs in a mirror of the repository with a compile database in {outside}/cdb: an existing compile_commands.json (paths rewritten to the mirror), one CMake (FETCHCONTENT_FULLY_DISCONNECTED, VCPKG_MANIFEST_INSTALL=OFF, CPM_USE_LOCAL_PACKAGES) or Meson (--wrap-mode=nodownload) configures into {outside}/cbuild/<compiler> after trace index --allow-build (configure runs the project's build scripts; nothing is built), or, without a build system, a database trace writes from syntax facts (-x c / -x c++, include directories). --query-driver names only the detected compilers; the background index is persisted in {outside}/cdb/.cache (never in the repository) and waited for after the first documents open, bounded: its end, a stall (no end and no shard change for 120 s: queries use the index as it is) or ready_timeout_secs (server_timeout); no .clangd/user config, no clang-tidy, no header insertion, preambles in memory. Sources a real build's database does not list are outside the build (not asked); inactive #if regions are reported by clangd and their calls are inactive_code. Linux / Windows on aarch64 have no clangd release: a clangd installed with the system (PATH, /usr/bin/clangd-NN, LLVM) is used, else the server is unavailable (servers/c_cpp.rs)."
+    }
+  ]
+}

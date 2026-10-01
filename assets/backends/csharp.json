@@ -1,0 +1,169 @@
+{
+  "schema": 2,
+  "backends": [
+    {
+      "id": "lsp:roslyn",
+      "kind": "lsp",
+      "languages": [
+        "csharp"
+      ],
+      "language_ids": [
+        "csharp"
+      ],
+      "server": {
+        "name": "Roslyn LS",
+        "version": "5.12.0-1.26426.8",
+        "license": "MIT"
+      },
+      "executable": {
+        "from": "runtime",
+        "runtime": "dotnet",
+        "program": "dotnet"
+      },
+      "args": [
+        "{tool:roslyn}/Microsoft.CodeAnalysis.LanguageServer.dll",
+        "--stdio",
+        "--logLevel",
+        "Information",
+        "--telemetryLevel",
+        "off",
+        "--extensionLogDirectory",
+        "{outside}/roslyn-logs"
+      ],
+      "env_allow": [
+        "ProgramFiles",
+        "ProgramFiles(x86)",
+        "ProgramW6432",
+        "ProgramData",
+        "CommonProgramFiles",
+        "SystemDrive",
+        "NUMBER_OF_PROCESSORS",
+        "PROCESSOR_ARCHITECTURE",
+        "USERNAME",
+        "LANG",
+        "LC_ALL"
+      ],
+      "env_set": {
+        "DOTNET_ROOT": "{runtime:dotnet}",
+        "DOTNET_CLI_HOME": "{outside}/dotnet-home",
+        "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+        "DOTNET_NOLOGO": "1",
+        "DOTNET_ADD_GLOBAL_TOOLS_TO_PATH": "false",
+        "DOTNET_GENERATE_ASPNET_CERTIFICATE": "false",
+        "DOTNET_SKIP_FIRST_TIME_EXPERIENCE": "1",
+        "DOTNET_CLI_UI_LANGUAGE": "en",
+        "DOTNET_MULTILEVEL_LOOKUP": "0",
+        "MSBUILDDISABLENODEREUSE": "1",
+        "TEMP": "{tmp}",
+        "TMP": "{tmp}",
+        "TMPDIR": "{tmp}"
+      },
+      "settings": {
+        "projects.dotnet_enable_automatic_restore": false,
+        "projects.dotnet_enable_file_based_programs": false,
+        "navigation.dotnet_navigate_to_decompiled_sources": false,
+        "navigation.dotnet_navigate_to_source_link_and_embedded_sources": false,
+        "csharp|background_analysis.dotnet_analyzer_diagnostics_scope": "none",
+        "csharp|background_analysis.dotnet_compiler_diagnostics_scope": "openFiles",
+        "csharp|symbol_search.dotnet_search_reference_assemblies": true
+      },
+      "workspace": {
+        "mode": "mirror",
+        "include_ignored": [
+          "**/project.assets.json",
+          "**/*.nuget.g.props",
+          "**/*.nuget.g.targets",
+          "**/*.nuget.dgspec.json",
+          "**/project.nuget.cache",
+          "packages/**",
+          "*/packages/**"
+        ],
+        "exclude": [
+          ".vs/**",
+          "**/.vs/**"
+        ]
+      },
+      "ready": {
+        "kind": "notification",
+        "method": "workspace/projectInitializationComplete"
+      },
+      "server_requests": {
+        "configuration_missing": "null"
+      },
+      "after_initialized": [
+        {
+          "method": "solution/open",
+          "params": "{json:roslyn_solution_open}"
+        },
+        {
+          "method": "project/open",
+          "params": "{json:roslyn_project_open}"
+        }
+      ],
+      "requires_build": {
+        "tool": "MSBuild",
+        "runs": "this project's build scripts",
+        "when": "always"
+      },
+      "toolchain": {
+        "ecosystem": "dotnet",
+        "needs": "the .NET SDK",
+        "install": "Install it from https://dotnet.microsoft.com/download"
+      },
+      "deps": {
+        "ecosystem": "dotnet"
+      },
+      "runtime": [
+        "dotnet"
+      ],
+      "install": {
+        "id": "roslyn",
+        "version": "5.12.0-1.26426.8",
+        "license": "MIT",
+        "display": "C# language server",
+        "product": "Roslyn LS",
+        "recipe": "archive",
+        "artifacts": [
+          {
+            "platform": "windows-x86_64",
+            "url": "https://api.nuget.org/v3-flatcontainer/roslyn-language-server.win-x64/5.12.0-1.26426.8/roslyn-language-server.win-x64.5.12.0-1.26426.8.nupkg",
+            "sha256": "56057c685af4e7433dfaf6b5879d2ab3c5496425420138b612f4af1074c8c4e6",
+            "subdir": "tools/net10.0/win-x64"
+          },
+          {
+            "platform": "windows-aarch64",
+            "url": "https://api.nuget.org/v3-flatcontainer/roslyn-language-server.win-arm64/5.12.0-1.26426.8/roslyn-language-server.win-arm64.5.12.0-1.26426.8.nupkg",
+            "sha256": "e36ad3cfde93cba5ceffb8eff186134e5fd76fefb73ac4d5be7fa2792391c637",
+            "subdir": "tools/net10.0/win-arm64"
+          },
+          {
+            "platform": "linux-x86_64",
+            "url": "https://api.nuget.org/v3-flatcontainer/roslyn-language-server.linux-x64/5.12.0-1.26426.8/roslyn-language-server.linux-x64.5.12.0-1.26426.8.nupkg",
+            "sha256": "50f88435f5875640fb2341878618dbfaec4354a1a134efcac0ae557247448a58",
+            "subdir": "tools/net10.0/linux-x64"
+          },
+          {
+            "platform": "linux-aarch64",
+            "url": "https://api.nuget.org/v3-flatcontainer/roslyn-language-server.linux-arm64/5.12.0-1.26426.8/roslyn-language-server.linux-arm64.5.12.0-1.26426.8.nupkg",
+            "sha256": "d2b60ac1d4fd41c19dfdcd940822793e2a9aac630ed547be277fd713d6ed666d",
+            "subdir": "tools/net10.0/linux-arm64"
+          },
+          {
+            "platform": "macos-x86_64",
+            "url": "https://api.nuget.org/v3-flatcontainer/roslyn-language-server.osx-x64/5.12.0-1.26426.8/roslyn-language-server.osx-x64.5.12.0-1.26426.8.nupkg",
+            "sha256": "99a61b3b3ffb32ce042e349df6dcc1051317d0a37f77884dd05c650709241a22",
+            "subdir": "tools/net10.0/osx-x64"
+          },
+          {
+            "platform": "macos-aarch64",
+            "url": "https://api.nuget.org/v3-flatcontainer/roslyn-language-server.osx-arm64/5.12.0-1.26426.8/roslyn-language-server.osx-arm64.5.12.0-1.26426.8.nupkg",
+            "sha256": "d56e272788599a08944287e17092d0951a32e85cd6f7d5ef2cc1e441331fa531",
+            "subdir": "tools/net10.0/osx-arm64"
+          }
+        ],
+        "executables": []
+      },
+      "safety": "Runs on the trace-managed .NET 10 runtime (DOTNET_ROOT = runtime:dotnet), never the user's; the user's .NET SDK (global.json rules) is only the project's MSBuild toolchain (first on PATH). MSBuild evaluation, the design-time build, NuGet build props/targets, task DLLs, source generators and analyzers run project code: always needs trace index --allow-build. Runs on a mirror of the repository (restore outputs obj/project.assets.json + *.nuget.g.props/targets copied; the design-time build writes only into the mirror's obj/). Automatic restore, file-based programs, decompiled and SourceLink navigation are off (no NuGet or network access at analysis time); unknown configuration sections are answered null (Roslyn crashes on {}); DOTNET_ADD_GLOBAL_TOOLS_TO_PATH=false, DOTNET_CLI_HOME in trace's state dir (the dotnet CLI otherwise writes the user's PATH), telemetry off, MSBuild node reuse off. Projects are opened explicitly (solution/open or project/open), never --autoLoadProjects (measured wrong cross-project definitions)."
+    }
+  ]
+}

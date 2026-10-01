@@ -1,0 +1,25 @@
+[package]
+name = "trace-infer"
+description = "Edge-case site inventory, value flow and site decisions for trace."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+trace-core.workspace = true
+# `is_test_path` (test-code provenance), the flow-fact IR names of `lower` (`<object>`, `<yielded>`,
+# `<lit>`) and the language rules (`language_rules`) inference applies.
+trace-syntax.workspace = true
+trace-library.workspace = true
+trace-env.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+# Parallel evaluation of flow candidate rows (read-only over the solved state).
+rayon.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

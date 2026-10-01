@@ -1,0 +1,24 @@
+[package]
+name = "trace-cli"
+description = "The `trace` command-line tool."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "trace"
+path = "src/main.rs"
+
+[dependencies]
+trace-core.workspace = true
+trace-syntax.workspace = true
+trace-semantic.workspace = true
+trace-infer.workspace = true
+trace-analysis.workspace = true
+trace-watch.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+clap.workspace = true

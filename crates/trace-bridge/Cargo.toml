@@ -1,0 +1,27 @@
+[package]
+name = "trace-bridge"
+description = "Cross-language bridges for trace: boundary facts matched across files by toolchain, ABI and contract rules, HTTP routes and manifests."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+trace-core.workspace = true
+trace-syntax.workspace = true
+trace-library.workspace = true
+trace-env.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+# Files are recognized in parallel.
+rayon.workspace = true
+blake3.workspace = true
+# Manifest endpoint hashes (codepath_next format pins files by sha256). Exact pin; builds
+# offline from the local cargo registry cache (sha2 0.10.9 + digest 0.10.7 + cpufeatures
+# 0.2.17 are cached). YAML: no YAML crate is in the local registry cache, so OpenAPI YAML
+# is read by the structured block-YAML reader `trace_core::formats::yaml`.
+sha2 = "=0.10.9"
+
+[dev-dependencies]
+tempfile.workspace = true

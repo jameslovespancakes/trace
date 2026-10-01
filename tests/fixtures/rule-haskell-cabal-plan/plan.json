@@ -1,0 +1,57 @@
+{
+  "cabal-version": "3.16.1.0",
+  "cabal-lib-version": "3.16.1.0",
+  "compiler-id": "ghc-9.10.3",
+  "os": "windows",
+  "arch": "x86_64",
+  "install-plan": [
+    {
+      "type": "pre-existing",
+      "id": "base-4.20.2.0-9e6e",
+      "pkg-name": "base",
+      "pkg-version": "4.20.2.0",
+      "depends": []
+    },
+    {
+      "type": "configured",
+      "id": "aeson-2.2.3.0-abc",
+      "pkg-name": "aeson",
+      "pkg-version": "2.2.3.0",
+      "style": "global",
+      "components": {
+        "lib": {
+          "depends": ["base-4.20.2.0-9e6e", "text-2.1.2-def"],
+          "exe-depends": []
+        }
+      }
+    },
+    {
+      "type": "configured",
+      "id": "text-2.1.2-def",
+      "pkg-name": "text",
+      "pkg-version": "2.1.2",
+      "style": "global",
+      "depends": ["base-4.20.2.0-9e6e"],
+      "exe-depends": []
+    },
+    {
+      "type": "configured",
+      "id": "tasty-1.5-ghi",
+      "pkg-name": "tasty",
+      "pkg-version": "1.5",
+      "style": "global",
+      "depends": ["base-4.20.2.0-9e6e"],
+      "exe-depends": []
+    },
+    {
+      "type": "configured",
+      "id": "app-0.1-inplace",
+      "pkg-name": "app",
+      "pkg-version": "0.1",
+      "style": "local",
+      "component-name": "lib",
+      "depends": ["aeson-2.2.3.0-abc", "base-4.20.2.0-9e6e"],
+      "exe-depends": []
+    }
+  ]
+}

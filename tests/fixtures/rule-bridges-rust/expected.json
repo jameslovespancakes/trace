@@ -1,0 +1,35 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): Axum (new coverage), reqwest and std::process::Command, derived from the cargo registry and rust-src.",
+  "roots": [
+    {"env": "CARGO_HOME", "home": ".cargo", "join": "registry/src", "ecosystem": "rust", "layout": "cargo_registry"},
+    {"command": ["rustc", "--print", "sysroot"], "join": "lib/rustlib/src/rust/library", "ecosystem": "rust", "layout": "toolchain_stdlib", "stdlib": true}
+  ],
+  "families": {
+    "axum": {
+      "calls": [
+        {"file": "src/lib.rs", "callee": "Router::new().route", "target": {"root": 0, "file": "*/axum-0.7.*/src/routing/mod.rs", "text": "pub fn route(self, path: &str"}},
+        {"file": "src/lib.rs", "callee": "get", "target": {"root": 0, "file": "*/axum-0.7.*/src/routing/method_routing.rs", "text": "top_level_handler_fn!(get, GET)"}}
+      ],
+      "endpoints": [
+        {"file": "src/lib.rs", "kind": "http", "role": "provides", "name": "GET /axum/users/{}"}
+      ]
+    },
+    "reqwest": {
+      "calls": [
+        {"file": "src/lib.rs", "callee": "reqwest::blocking::get", "target": {"root": 0, "file": "*/reqwest-0.12.*/src/blocking/mod.rs", "text": "pub fn get<T: crate::IntoUrl>(url: T)"}}
+      ],
+      "endpoints": [
+        {"file": "src/lib.rs", "kind": "http", "role": "uses", "name": "GET /axum/users/1"}
+      ]
+    },
+    "subprocess": {
+      "calls": [
+        {"file": "src/lib.rs", "callee": "std::process::Command::new", "target": {"root": 1, "file": "std/src/process.rs", "text": "pub fn new<S: AsRef<OsStr>>(program: S)"}},
+        {"file": "src/lib.rs", "callee": "std::process::Command::new(\"procs/build.sh\").status", "target": {"root": 1, "file": "std/src/process.rs", "text": "pub fn status(&mut self)"}}
+      ],
+      "endpoints": [
+        {"file": "src/lib.rs", "kind": "subprocess", "role": "uses", "name": "procs/build.sh"}
+      ]
+    }
+  }
+}

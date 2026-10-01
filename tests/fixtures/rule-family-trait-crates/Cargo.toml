@@ -1,0 +1,6 @@
+# Fixture of the family rule (trait implementations across crates); never built or run,
+# read by trace-syntax and rust-analyzer only. Crate `a` declares the trait `Sink` and a
+# forwarding impl for `&mut S`; crate `b` implements it (also in `testutil.rs`).
+[workspace]
+members = ["a", "b"]
+resolver = "2"

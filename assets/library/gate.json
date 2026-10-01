@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "threshold": 0.9,
+  "languages": {
+    "python": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "javascript": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "rust": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "go": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "java": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "c": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "cpp": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "csharp": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "php": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "bash": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "scala": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "r": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    },
+    "haskell": {
+      "precision": 0.0,
+      "facts": 0,
+      "sample": "",
+      "passed": false
+    }
+  },
+  "bridges": {
+    "python": {
+      "passed": false
+    },
+    "javascript": {
+      "passed": false
+    },
+    "rust": {
+      "passed": false
+    },
+    "go": {
+      "passed": false
+    },
+    "java": {
+      "passed": false
+    },
+    "c": {
+      "passed": false
+    },
+    "cpp": {
+      "passed": false
+    },
+    "csharp": {
+      "passed": false
+    },
+    "php": {
+      "passed": false
+    },
+    "bash": {
+      "passed": false
+    },
+    "scala": {
+      "passed": false
+    },
+    "r": {
+      "passed": false
+    },
+    "haskell": {
+      "passed": false
+    }
+  }
+}

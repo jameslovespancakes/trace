@@ -1,0 +1,51 @@
+{
+  "schema": 2,
+  "backends": [
+    {
+      "id": "pyright",
+      "kind": "pyright",
+      "languages": [
+        "python"
+      ],
+      "server": {
+        "name": "pyright",
+        "version": "1.1.414",
+        "license": "MIT"
+      },
+      "executable": {
+        "from": "node_script",
+        "tool": "pyright",
+        "script": "node_modules/pyright/langserver.index.js"
+      },
+      "toolchain": {
+        "ecosystem": "python",
+        "needs": "Python",
+        "install": "Install it from https://www.python.org/downloads",
+        "optional": true
+      },
+      "deps": {
+        "ecosystem": "python"
+      },
+      "runtime": [
+        "node"
+      ],
+      "install": {
+        "id": "pyright",
+        "version": "1.1.414",
+        "license": "MIT",
+        "display": "Python language server",
+        "product": "Pyright",
+        "recipe": "npm",
+        "packages": [
+          {
+            "path": "node_modules/pyright",
+            "version": "1.1.414",
+            "url": "https://registry.npmjs.org/pyright/-/pyright-1.1.414.tgz",
+            "integrity": "sha512-FPZZb51jepDX4eP7TEYDeNFtmE3WgwkkEcJpvH3/QmUSsj0EAy3LXu+xB4T/FWDejtsXlCfFr/rbWFjwuwuXww=="
+          }
+        ]
+      },
+      "safety": "node --require lsp_guard.cjs (no child processes, sockets or writes outside the snapshot); controlled pyrightconfig (no interpreter configured, so Python never runs); the environment's site-packages are read, never imported"
+    }
+  ]
+}

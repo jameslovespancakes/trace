@@ -1,0 +1,131 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): the old table families of JavaScript plus the new-coverage Hono / Koa. Targets use a text snippet where the package defines the method dynamically (no declaration name).",
+  "roots": [
+    {"path": "node_modules", "ecosystem": "node", "layout": "node_modules"}
+  ],
+  "families": {
+    "express": {
+      "calls": [
+        {"file": "server/express_app.js", "callee": "app.get", "target": {"file": "express/lib/application.js", "text": "app[method] = function(path)"}},
+        {"file": "server/express_app.js", "callee": "router.get", "target": {"file": "express/lib/router/index.js", "text": "proto[method] = function(path)"}},
+        {"file": "server/express_app.js", "callee": "app.use", "target": {"file": "express/lib/application.js", "text": "app.use = function use(fn)"}}
+      ],
+      "endpoints": [
+        {"file": "server/express_app.js", "kind": "http", "role": "provides", "name": "GET /express/users/{}"},
+        {"file": "server/express_app.js", "kind": "http", "role": "provides", "name": "GET /health"},
+        {"file": "server/express_app.js", "kind": "http", "role": "provides", "name": "MOUNT /ops"}
+      ]
+    },
+    "fastify": {
+      "calls": [
+        {"file": "server/fastify_app.js", "callee": "fastify.get", "target": {"file": "fastify/fastify.js", "text": "get: function _get"}},
+        {"file": "server/fastify_app.js", "callee": "fastify.route", "target": {"file": "fastify/fastify.js", "text": "route: function _route"}}
+      ],
+      "endpoints": [
+        {"file": "server/fastify_app.js", "kind": "http", "role": "provides", "name": "GET /fastify/orders"},
+        {"file": "server/fastify_app.js", "kind": "http", "role": "provides", "name": "POST /fastify/orders"}
+      ]
+    },
+    "koa": {
+      "calls": [
+        {"file": "server/koa_app.js", "callee": "router.get", "target": {"file": "@koa/router/lib/router.js", "text": "Router.prototype[method] = function"}}
+      ],
+      "endpoints": [
+        {"file": "server/koa_app.js", "kind": "http", "role": "provides", "name": "GET /koa/items/{}"}
+      ]
+    },
+    "hono": {
+      "calls": [
+        {"file": "server/hono_app.js", "callee": "app.get", "target": {"file": "hono/dist/cjs/hono-base.js", "text": "this[method] = (args1, ...args)"}}
+      ],
+      "endpoints": [
+        {"file": "server/hono_app.js", "kind": "http", "role": "provides", "name": "GET /hono/books/{}"}
+      ]
+    },
+    "restify": {
+      "calls": [
+        {"file": "server/restify_app.js", "callee": "server.get", "target": {"file": "restify/lib/server.js", "text": "Server.prototype.get"}}
+      ],
+      "endpoints": [
+        {"file": "server/restify_app.js", "kind": "http", "role": "provides", "name": "GET /restify/ping"}
+      ]
+    },
+    "fetch": {
+      "calls": [
+        {"file": "client/clients.js", "callee": "fetch", "symbol": "fetch"}
+      ],
+      "endpoints": [
+        {"file": "client/clients.js", "kind": "http", "role": "uses", "name": "GET /express/users/7"}
+      ]
+    },
+    "axios": {
+      "calls": [
+        {"file": "client/clients.js", "callee": "axios.post", "target": {"file": "axios/lib/core/Axios.js", "text": "function httpMethod(url, data, config)"}}
+      ],
+      "endpoints": [
+        {"file": "client/clients.js", "kind": "http", "role": "uses", "name": "POST /fastify/orders"}
+      ]
+    },
+    "ky-got-superagent": {
+      "calls": [
+        {"file": "client/clients.js", "callee": "got.get", "target": {"file": "got/dist/source/create.js", "text": "for (const method of aliases)"}},
+        {"file": "client/clients.js", "callee": "superagent.get", "target": {"file": "superagent/lib/node/index.js", "text": "request[name] = (url, data, fn) =>"}}
+      ],
+      "endpoints": [
+        {"file": "client/clients.js", "kind": "http", "role": "uses", "name": "GET /koa/items/1"},
+        {"file": "client/clients.js", "kind": "http", "role": "uses", "name": "GET /hono/books/2"}
+      ]
+    },
+    "socket.io": {
+      "calls": [
+        {"file": "messaging/events.js", "callee": "io.on", "target": {"file": "socket.io/dist/typed-events.js", "text": "on(ev, listener)"}},
+        {"file": "messaging/events.js", "callee": "io.emit", "target": {"file": "socket.io/dist/typed-events.js", "text": "emit(ev, ...args)"}}
+      ],
+      "endpoints": [
+        {"file": "messaging/events.js", "kind": "message", "role": "provides", "name": "chat"},
+        {"file": "messaging/events.js", "kind": "message", "role": "uses", "name": "chat"}
+      ]
+    },
+    "node-messages": {
+      "calls": [
+        {"file": "messaging/events.js", "callee": "producer.send", "target": {"file": "kafkajs/src/producer/messageProducer.js", "text": "const send = async"}},
+        {"file": "messaging/events.js", "callee": "channel.sendToQueue", "target": {"file": "amqplib/lib/channel_model.js", "text": "sendToQueue(queue, content, options) {"}}
+      ],
+      "endpoints": [
+        {"file": "messaging/events.js", "kind": "message", "role": "uses", "name": "events"},
+        {"file": "messaging/events.js", "kind": "message", "role": "uses", "name": "jobs"}
+      ]
+    },
+    "subprocess": {
+      "calls": [
+        {"file": "procs/run.js", "callee": "spawn", "symbol": "child_process.spawn"},
+        {"file": "procs/run.js", "callee": "execa", "target": {"file": "execa/index.js", "text": "const execa = (file, args, options)"}}
+      ],
+      "endpoints": [
+        {"file": "procs/run.js", "kind": "subprocess", "role": "uses", "name": "procs/build.py"},
+        {"file": "procs/run.js", "kind": "subprocess", "role": "uses", "name": "procs/deploy.sh"}
+      ]
+    },
+    "ffi": {
+      "note": "koffi is a native addon: its lookup function has no JavaScript source",
+      "calls": [
+        {"file": "native/ffi_use.js", "callee": "lib.func", "symbol": "koffi.func"}
+      ],
+      "endpoints": [
+        {"file": "native/ffi_use.js", "kind": "ffi", "role": "uses", "name": "compress_buf"}
+      ]
+    },
+    "next": {
+      "calls": [
+        {"file": "client/next_client.js", "callee": "fetch", "symbol": "fetch"}
+      ],
+      "endpoints": [
+        {"file": "pages/api/orders/[id].js", "kind": "http", "role": "provides", "name": "* /api/orders/{}"},
+        {"file": "client/next_client.js", "kind": "http", "role": "uses", "name": "GET /api/orders/9"}
+      ],
+      "bridges": [
+        {"kind": "http", "from": "client/next_client.js:loadOrder", "to": "pages/api/orders/[id].js:orderHandler"}
+      ]
+    }
+  }
+}

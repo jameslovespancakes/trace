@@ -1,0 +1,49 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): Go routers (gin, chi, new-coverage echo), the net/http client and os/exec, derived from the module cache and GOROOT sources.",
+  "roots": [
+    {"command": ["go", "env", "GOMODCACHE"], "ecosystem": "go", "layout": "go_modcache"},
+    {"command": ["go", "env", "GOROOT"], "join": "src", "ecosystem": "go", "layout": "toolchain_stdlib", "stdlib": true}
+  ],
+  "families": {
+    "gin": {
+      "calls": [
+        {"file": "server/gin_app.go", "callee": "r.GET", "target": {"file": "github.com/gin-gonic/gin@*/routergroup.go", "text": "func (group *RouterGroup) GET("}}
+      ],
+      "endpoints": [
+        {"file": "server/gin_app.go", "kind": "http", "role": "provides", "name": "GET /gin/users/{}"}
+      ]
+    },
+    "chi": {
+      "calls": [
+        {"file": "server/chi_app.go", "callee": "r.Get", "target": {"file": "github.com/go-chi/chi/v5@*/mux.go", "text": "func (mx *Mux) Get("}}
+      ],
+      "endpoints": [
+        {"file": "server/chi_app.go", "kind": "http", "role": "provides", "name": "GET /chi/items/{}"}
+      ]
+    },
+    "echo": {
+      "calls": [
+        {"file": "server/echo_app.go", "callee": "e.GET", "target": {"file": "github.com/labstack/echo/v4@*/echo.go", "text": "func (e *Echo) GET("}}
+      ],
+      "endpoints": [
+        {"file": "server/echo_app.go", "kind": "http", "role": "provides", "name": "GET /echo/books/{}"}
+      ]
+    },
+    "net-http": {
+      "calls": [
+        {"file": "client/client.go", "callee": "http.Get", "target": {"root": 1, "file": "net/http/client.go", "text": "func Get(url string)"}}
+      ],
+      "endpoints": [
+        {"file": "client/client.go", "kind": "http", "role": "uses", "name": "GET /gin/users/1"}
+      ]
+    },
+    "subprocess": {
+      "calls": [
+        {"file": "procs/run.go", "callee": "exec.Command", "target": {"root": 1, "file": "os/exec/exec.go", "text": "func Command(name string, arg ...string)"}}
+      ],
+      "endpoints": [
+        {"file": "procs/run.go", "kind": "subprocess", "role": "uses", "name": "procs/build.py"}
+      ]
+    }
+  }
+}

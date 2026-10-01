@@ -1,0 +1,5 @@
+# actionlint configuration. `windows-11-arm` is a GitHub-hosted Windows ARM64 runner for
+# public repositories that older actionlint releases do not list yet.
+self-hosted-runner:
+  labels:
+    - windows-11-arm

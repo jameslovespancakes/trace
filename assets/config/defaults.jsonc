@@ -1,0 +1,226 @@
+// trace settings: every tunable with its default (embedded in the binary; read with
+// trace_core::formats::jsonc into trace_core::Settings).
+//
+// Users override any key in <cache home>/config.json (%LOCALAPPDATA%\trace\config.json on
+// Windows): same layout, plain JSON, only the keys that differ. Earlier key names keep
+// working: semantic.memory_budget_mb and semantic.pool_memory_mb set memory.budget_mb.
+// Unknown keys are ignored. Configuration is never read from an inspected repository.
+// "auto" values are computed in one place (trace_core::config::Settings::auto).
+{
+  "memory": {
+    // Memory budget of one language-server pool in MB (0 = unbounded). Pyright picks its
+    // process count as the largest that fits the estimate; request-sharded pools divide it by
+    // request_shard_mb.
+    "budget_mb": 4096,
+    // Estimated fixed memory of one Pyright process in MB (Node runtime, bundled stubs).
+    "server_base_mb": 280,
+    // Growth of a pool per extra process, in percent of one process's estimate.
+    "server_extra_percent": 45,
+    // Estimated memory of one request-sharded server process in MB.
+    "request_shard_mb": 150,
+    // Library source kept parsed while library derivations run, in MB of source (the parsed
+    // form takes ~25x more): the derivations of one index share the files they all load.
+    "library_parse_mb": 32
+  },
+
+  "workers": {
+    // Most analyzer processes of a sharded pool (Pyright): a number (1..=32) or "auto" =
+    // min(cores / 2, server_processes_max). TRACE_SEMANTIC_PROCESSES overrides it.
+    "server_processes": "auto",
+    // Upper bound of "auto" server_processes (beyond 4, pools add memory but no speed).
+    "server_processes_max": 4,
+    // Most processes of a request-sharded pool ("auto" part: min(this, cores / 2)).
+    "max_request_shards": 8,
+    // Estimated requests worth one more request-sharded process.
+    "requests_per_shard": 40,
+    // Fewest queried files worth a process of their own.
+    "min_files_per_process": 10
+  },
+
+  "semantic": {
+    // Language servers and their runtimes installed by trace (absolute path; null =
+    // <local data dir>/trace/tools). TRACE_SEMANTIC_TOOLS overrides it.
+    "tools_dir": null,
+    // Backend registry override: a directory of JSON files in the schema of
+    // assets/backends/*.json (absolute path; null = the embedded registry).
+    "registry": null,
+    // Install the servers of default languages automatically on first need
+    // (TRACE_OFFLINE=1 and TRACE_NO_AUTO_INSTALL=1 turn it off).
+    "auto_install": true,
+    // Bound of one language-server request.
+    "request_timeout_secs": 60,
+    // Bound of one whole server session.
+    "session_deadline_secs": 900,
+    // In-flight requests per session (clamped to 1..=64).
+    "max_in_flight": 16,
+    // Readiness bound of a backend whose registry entry names none.
+    "ready_timeout_secs": 600,
+    // Bound on typeHierarchy/subtypes requests per shard.
+    "max_subtype_requests": 4000,
+    // Bound on textDocument/implementation requests at library calls per shard.
+    "max_library_dispatch_requests": 2000,
+    // Bound of one approved toolchain / build step of a preflight (build metadata, project
+    // configure, build plans).
+    "build_step_timeout_secs": 600,
+    // Bound of one install command of a language server or its runtime.
+    "install_timeout_secs": 2700,
+    // Parallel package downloads of one npm install.
+    "parallel_downloads": 8,
+    // Largest accepted download of a server or runtime, in MB.
+    "max_download_mb": 1024,
+    // Largest unpacked size of one downloaded archive, in MB.
+    "max_unpacked_mb": 4096,
+    // Largest repository mirrored into a server workspace, in MB.
+    "max_mirror_mb": 4096,
+    // Resources per backend id (the backend files hold launch and protocol only): processes
+    // of a pool, max_in_flight (requests pipelined to one process; lowers the window above),
+    // ready_timeout_secs (else the value above), heap_mb (JVM heap, the launch's {heap_mb}),
+    // ready_grace_ms / ready_settle_ms (`progress` readiness). Pyright's processes are
+    // workers.server_processes.
+    "per_backend": {
+      "pyright": {},
+      "typescript": {},
+      "lsp:rust-analyzer": { "processes": 1, "ready_timeout_secs": 600 },
+      "lsp:gopls": { "processes": 1, "ready_timeout_secs": 600, "ready_grace_ms": 2000, "ready_settle_ms": 0 },
+      "lsp:jdtls": { "processes": 1, "max_in_flight": 4, "heap_mb": 3072 },
+      "lsp:clangd": { "processes": 1, "ready_timeout_secs": 600 },
+      "lsp:intelephense": { "processes": 1, "ready_grace_ms": 1000, "ready_settle_ms": 0 },
+      "lsp:bash-language-server": { "processes": 8, "ready_timeout_secs": 120 },
+      "lsp:roslyn": { "processes": 1, "ready_timeout_secs": 600 },
+      "lsp:metals": { "processes": 1, "heap_mb": 3072 },
+      "lsp:haskell-language-server": { "processes": 1, "ready_timeout_secs": 600, "ready_grace_ms": 5000, "ready_settle_ms": 3000 },
+      "lsp:r-languageserver": { "ready_timeout_secs": 600 }
+    }
+  },
+
+  "inventory": {
+    // Most files inventoried per repository.
+    "max_files": 50000,
+    // Larger files are omitted (file_size_limit).
+    "max_file_bytes": 2000000,
+    // Total bytes inventoried per repository.
+    "max_total_bytes": 400000000,
+    // Gitignore-style globs (relative to the root) of files and folders to leave out.
+    "exclude": []
+  },
+
+  "syntax": {
+    // Per-file parse deadline in milliseconds (a file that takes longer is inventoried with a
+    // parse timeout diagnostic).
+    "parse_timeout_ms": 5000
+  },
+
+  "flow": {
+    // Safety bound on rounds per value-flow solver phase.
+    "max_iterations": 30,
+    // Evaluation budget of one solve: base + per_constraint x constraints ...
+    "eval_budget_base": 1000000,
+    "eval_budget_per_constraint": 64,
+    // ... unless a fixed budget is given here (a positive number; null = computed).
+    "eval_budget": null,
+    // Receiver contexts analysed per method before new receivers are widened to their class.
+    "max_contexts": 12,
+    // Values stored per slot (and allocations per class attribute) before widening.
+    "max_slot_values": 64,
+    // Rounds of the consumed-parameter fixpoint (forwarding chains).
+    "max_consume_rounds": 16,
+    // Objects one member lookup visits through delegates (mixins, prototypes).
+    "max_delegate_visits": 32,
+    // Saturated slots named in the flow_bound diagnostic.
+    "bound_examples": 12,
+    // Levels of site composition by receiver.
+    "max_compose_depth": 2,
+    // Depth of receiver-type resolution (aliases, fields, returns).
+    "max_type_depth": 6
+  },
+
+  "derive": {
+    // Library derivation (reading installed library source, never executing it). Summaries
+    // derived with other values are cached under their own key.
+    // Library files loaded for one derivation (the target file, its namespace group, imports).
+    "max_units": 40,
+    // Fixed-point rounds per derivation phase.
+    "max_rounds": 25,
+    // Import hops followed from the target file.
+    "import_depth": 2,
+    // Library files larger than this are not read (bytes).
+    "max_file_bytes": 4194304,
+    // Expression evaluation depth.
+    "max_eval_depth": 24,
+    // Slots of one attribute name compared for class relationships per round.
+    "max_related_slots": 256,
+    // Files of one package read for its declared types (typed dispatch).
+    "max_package_files": 256,
+    // Size bound of the per-machine library summary cache (bytes).
+    "cache_max_bytes": 536870912
+  },
+
+  "bridges": {
+    // Detect cross-language bridges while indexing.
+    "enabled": true,
+    // HTTP route <-> client bridges.
+    "http": true,
+    // Weak (possible-only) boundaries: subprocess, FFI lookups, message names.
+    "weak": true,
+    // Hand-written bridge manifests (absolute paths outside every inspected root).
+    "manifests": []
+  },
+
+  "watch": {
+    // Quiet period after the last file event before an update.
+    "debounce_ms": 300,
+    // Longest a continuous stream of events can postpone an update.
+    "max_delay_ms": 2000,
+    // Polling interval when file events are unavailable.
+    "poll_ms": 2000,
+    // How long the watch loop waits for changes before it looks at the root and idle work again.
+    "tick_ms": 500,
+    // Stale dependents resolved per batch (a new edit waits behind at most one batch).
+    "stale_batch": 512,
+    // A failed update is not retried before this long (new changes retry at once).
+    "retry_after_ms": 10000,
+    // Retry this soon when another process holds the build lock.
+    "retry_locked_ms": 250
+  },
+
+  "analysis": {
+    // Longest wait for another process updating the index, then the `locked` error (seconds).
+    "wait_limit_secs": 600,
+    // Polling interval while waiting for another process (ms).
+    "wait_poll_ms": 200,
+    // How long a command waits for a running `trace index --watch` to publish the update of
+    // changed files before it updates in-process itself (ms; covers the watcher's debounce).
+    "watch_grace_ms": 3000,
+    // How long a command waits for a running `trace index --watch` to publish its next batch of
+    // stale dependents before resolving them in-process (seconds).
+    "stale_grace_secs": 60,
+    // `trace status` warns when a semantic language resolves less than this share of its
+    // in-repository calls.
+    "resolution_warn": 0.8
+  },
+
+  "cache": {
+    // Delta journal of the index: an update rewrites the base once the carried file blocks
+    // exceed base size / compact_ratio (4 = 25%); an idle process compacts once the whole
+    // journal does.
+    "compact_ratio": 4,
+    // An idle process compacts once the journal holds this many segments.
+    "idle_compact_segments": 16
+  },
+
+  "debug": {
+    // Print by-name injection bindings and flow candidates (stderr).
+    "fixtures": false,
+    // Print the value-flow items evaluated per round (stderr).
+    "flow_items": false,
+    // Answer from syntax where the answer is unambiguous (false: ask the server for
+    // everything; results are identical either way).
+    "syntax_answers": true,
+    // Backend ids (or "all") whose calls are resolved with definition instead of call
+    // hierarchy (A/B verification).
+    "calls_by_definition": []
+  },
+
+  // Absolute directories trace must never inspect (plus TRACE_FORBIDDEN_ROOTS).
+  "forbidden_roots": []
+}

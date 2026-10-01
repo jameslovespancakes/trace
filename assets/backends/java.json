@@ -1,0 +1,254 @@
+{
+  "schema": 2,
+  "backends": [
+    {
+      "id": "lsp:jdtls",
+      "kind": "lsp",
+      "languages": [
+        "java"
+      ],
+      "language_ids": [
+        "java"
+      ],
+      "server": {
+        "name": "jdtls",
+        "version": "1.61.0-202609031315",
+        "license": "EPL-2.0"
+      },
+      "executable": {
+        "from": "runtime",
+        "runtime": "jdk",
+        "program": "bin/java"
+      },
+      "args": [
+        "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+        "-Dosgi.bundles.defaultStartLevel=4",
+        "-Declipse.product=org.eclipse.jdt.ls.core.product",
+        "-Dosgi.checkConfiguration=true",
+        "-Dosgi.sharedConfiguration.area={jdtls_config}",
+        "-Dosgi.sharedConfiguration.area.readOnly=true",
+        "-Dosgi.configuration.cascaded=true",
+        "-Djava.import.generatesMetadataFilesAtProjectRoot=false",
+        "-Duser.home={outside}/home",
+        "-Dorg.gradle.daemon.registry.base={outside}/gradle-daemon",
+        "-Dorg.gradle.daemon.idletimeout=15000",
+        "-Djava.io.tmpdir={tmp}",
+        "-Dlog.level=ERROR",
+        "-Djava.net.useSystemProxies=false",
+        "-Dhttp.proxyHost=127.0.0.1",
+        "-Dhttp.proxyPort=9",
+        "-Dhttps.proxyHost=127.0.0.1",
+        "-Dhttps.proxyPort=9",
+        "-Dhttp.nonProxyHosts=",
+        "-Xms64m",
+        "-Xmx{heap_mb}m",
+        "--add-modules=ALL-SYSTEM",
+        "--add-opens",
+        "java.base/java.util=ALL-UNNAMED",
+        "--add-opens",
+        "java.base/java.lang=ALL-UNNAMED",
+        "-jar",
+        "{tool:jdtls}/plugins/org.eclipse.equinox.launcher_*.jar",
+        "-configuration",
+        "{outside}/jdtls-config",
+        "-data",
+        "{outside}/jdtls-data"
+      ],
+      "env_set": {
+        "JAVA_HOME": "{runtime:jdk}",
+        "TEMP": "{tmp}",
+        "TMP": "{tmp}"
+      },
+      "initialization_options": {
+        "extendedClientCapabilities": {
+          "classFileContentsSupport": true
+        },
+        "settings": {
+          "java": {
+            "import": {
+              "maven": {
+                "enabled": "{json:maven_import}",
+                "offline": {
+                  "enabled": true
+                }
+              },
+              "gradle": {
+                "enabled": "{json:gradle_import}",
+                "wrapper": {
+                  "enabled": "{json:gradle_wrapper}"
+                },
+                "offline": {
+                  "enabled": true
+                },
+                "arguments": "--offline",
+                "user": {
+                  "home": "{json:gradle_user_home}"
+                },
+                "java": {
+                  "home": "{json:gradle_java_home}"
+                },
+                "home": "{json:gradle_home}",
+                "annotationProcessing": {
+                  "enabled": false
+                }
+              },
+              "exclusions": "{json:import_exclusions}"
+            },
+            "configuration": {
+              "updateBuildConfiguration": "disabled",
+              "maven": {
+                "userSettings": "{outside}/maven-settings.xml",
+                "globalSettings": "{outside}/maven-settings.xml"
+              },
+              "runtimes": "{json:java_runtimes}",
+              "detectJdksAtStart": false
+            },
+            "autobuild": {
+              "enabled": false
+            },
+            "maven": {
+              "downloadSources": false
+            },
+            "eclipse": {
+              "downloadSources": false
+            },
+            "project": {
+              "importOnFirstTimeStartup": "automatic",
+              "importHint": false
+            },
+            "jdt": {
+              "ls": {
+                "lombokSupport": {
+                  "enabled": false
+                }
+              }
+            },
+            "telemetry": {
+              "enabled": false
+            }
+          }
+        }
+      },
+      "settings": {
+        "java": {
+          "import": {
+            "maven": {
+              "enabled": "{json:maven_import}",
+              "offline": {
+                "enabled": true
+              }
+            },
+            "gradle": {
+              "enabled": "{json:gradle_import}",
+              "wrapper": {
+                "enabled": "{json:gradle_wrapper}"
+              },
+              "offline": {
+                "enabled": true
+              },
+              "arguments": "--offline",
+              "user": {
+                "home": "{json:gradle_user_home}"
+              },
+              "java": {
+                "home": "{json:gradle_java_home}"
+              },
+              "home": "{json:gradle_home}",
+              "annotationProcessing": {
+                "enabled": false
+              }
+            },
+            "exclusions": "{json:import_exclusions}"
+          },
+          "configuration": {
+            "updateBuildConfiguration": "disabled",
+            "maven": {
+              "userSettings": "{outside}/maven-settings.xml",
+              "globalSettings": "{outside}/maven-settings.xml"
+            },
+            "runtimes": "{json:java_runtimes}",
+            "detectJdksAtStart": false
+          },
+          "autobuild": {
+            "enabled": false
+          },
+          "maven": {
+            "downloadSources": false
+          },
+          "eclipse": {
+            "downloadSources": false
+          },
+          "project": {
+            "importOnFirstTimeStartup": "automatic",
+            "importHint": false
+          },
+          "jdt": {
+            "ls": {
+              "lombokSupport": {
+                "enabled": false
+              }
+            }
+          },
+          "telemetry": {
+            "enabled": false
+          }
+        }
+      },
+      "workspace": {
+        "mode": "mirror",
+        "include_ignored": [
+          "**/target/generated-sources/**",
+          "**/target/generated-test-sources/**",
+          "**/build/generated/**",
+          "**/build/generated-sources/**"
+        ],
+        "exclude": [
+          "**/.project",
+          "**/.classpath",
+          "**/.settings/**",
+          "**/.factorypath",
+          ".idea/**",
+          "**/.gradle/**",
+          ".metals/**",
+          ".bloop/**"
+        ]
+      },
+      "ready": {
+        "kind": "language_status"
+      },
+      "requires_build": {
+        "tool": "Maven or Gradle",
+        "runs": "this project's build",
+        "when": "decided_by_hooks"
+      },
+      "toolchain": {
+        "ecosystem": "jvm",
+        "needs": "a JDK",
+        "install": "Install one from https://adoptium.net"
+      },
+      "deps": {
+        "ecosystem": "jvm"
+      },
+      "runtime": [
+        "jdk"
+      ],
+      "install": {
+        "id": "jdtls",
+        "version": "1.61.0-202609031315",
+        "license": "EPL-2.0",
+        "display": "Java language server",
+        "product": "Eclipse JDT LS",
+        "recipe": "archive",
+        "artifacts": [
+          {
+            "platform": "any",
+            "url": "https://download.eclipse.org/jdtls/milestones/1.61.0/jdt-language-server-1.61.0-202609031315.tar.gz",
+            "sha256": "338e7e73d61836651ba2453919a0d34fa763eb4e7c03342092309bffb8934c64"
+          }
+        ],
+        "executables": []
+      },
+      "safety": "jdtls runs on the trace-managed JDK 21 with user.home, tmp, configuration and -data in the per-backend state folder (never in the repository; the workspace is trace's mirror). Maven (m2e) and Gradle (Buildship) import only after `trace index --allow-build` (they run the project's build plugins / build scripts), always offline: a generated settings.xml with <offline>true</offline> and the detected local repository, Gradle --offline; autobuild, annotation processing, source downloads and Lombok are off; a dead proxy (127.0.0.1:9) makes every HTTP lookup of the server JVM fail locally. The Gradle daemon runs on a JDK the Gradle version accepts (never an older JAVA_HOME), keeps its registry in the state folder and stops after 15 s idle. Build-less sources need no approval (Eclipse .project/.classpath in a snapshot)."
+    }
+  ]
+}

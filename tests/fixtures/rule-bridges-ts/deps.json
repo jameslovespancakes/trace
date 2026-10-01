@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "npm": [
+      "@nestjs/common@10.3.8",
+      "@nestjs/core@10.3.8",
+      "reflect-metadata@0.2.2",
+      "rxjs@7.8.1",
+      "@angular/common@17.3.6",
+      "@angular/core@17.3.6",
+      "typescript@5.4.5"
+    ]
+  },
+  "expect": "ok"
+}

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "language": "haskell",
+  "runtime": "GHC base library (compiled; the function-type rule covers arrow and action types from the hover type)",
+  "conventions": "Symbols are module-qualified (Control.Monad.sequence_). An argument of an arrow type, of IO a, or of m a where m has a Functor/Applicative/Monad class constraint may be run (function-type rule); rows cover only containers of actions.",
+  "roots": ["Control.Monad", "Data.Foldable", "Data.Traversable"],
+  "prelude": ["Prelude"],
+  "function_types": ["->", "IO", "GHC.Types.IO", "ST", "Control.Monad.ST.ST", "STM", "GHC.Conc.STM"],
+  "top_types": ["a"],
+  "wrapper_types": [],
+  "data_types": [],
+  "entries": [
+    {"symbol": "Control.Monad.sequence_", "aliases": ["Data.Foldable.sequence_", "Data.Foldable.sequenceA_", "Data.Traversable.sequence", "Data.Traversable.sequenceA", "Control.Monad.sequence", "Control.Monad.msum"], "kind": "function", "effects": [{"iterates": {"pos": 0}}, {"calls": {"pos": 0}}], "basis": "no_source",
+     "describe": "sequence_ actions runs every action of the container in order", "why": "base ships compiled; the container type t (m a) is not an action or arrow type, so the function-type rule does not see that the elements run"}
+  ],
+  "ffi_conventions": [
+    {"pattern": "foreign import ccall \"name\"", "channel": "ffi", "why_not_derivable": "language_spec", "describe": "the declared Haskell function calls the C symbol name"},
+    {"pattern": "foreign export ccall \"name\"", "channel": "ffi", "why_not_derivable": "language_spec", "describe": "the Haskell function is exported to C as name"}
+  ],
+  "test_conventions": [
+    {"glob": "test/**/*Spec.hs", "activated_by": "hspec-discover", "why_not_derivable": "reflection",
+     "describe": "hspec-discover collects the spec of every *Spec.hs module under the test directory"}
+  ]
+}

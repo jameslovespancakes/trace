@@ -1,0 +1,24 @@
+[package]
+name = "trace-core"
+description = "Core contract types, graph, bounded queries, inventory, fingerprints and persistent cache for trace."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+postcard.workspace = true
+blake3.workspace = true
+thiserror.workspace = true
+ignore.workspace = true
+dirs.workspace = true
+rayon.workspace = true
+# Structured readers for manifests (formats::toml / formats::xml). Exact pins, offline cache.
+toml = { version = "=0.8.23", default-features = false, features = ["parse"] }
+quick-xml = "=0.37.5"
+
+[dev-dependencies]
+tempfile.workspace = true

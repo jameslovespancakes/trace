@@ -1,0 +1,41 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): ASP.NET minimal APIs (io_entry rows: compiled framework), attribute routes (reflection_roots rows: the attribute classes implement the root interfaces in compiled metadata), HttpClient (io_send rows), Process.Start (io_send row) and DllImport (ffi_conventions attribute row).",
+  "roots": [
+    {"env": "NUGET_PACKAGES", "home": ".nuget/packages", "ecosystem": "dotnet", "layout": "nuget_packages"},
+    {"env": "DOTNET_ROOT", "join": "shared", "ecosystem": "dotnet", "layout": "toolchain_stdlib", "stdlib": true},
+    {"env": "ProgramFiles", "join": "dotnet/shared", "ecosystem": "dotnet", "layout": "toolchain_stdlib", "stdlib": true}
+  ],
+  "families": {
+    "aspnet-minimal": {
+      "calls": [
+        {"file": "Api/Program.cs", "callee": "app.MapGet", "symbol": "Microsoft.AspNetCore.Builder.EndpointRouteBuilderExtensions.MapGet"}
+      ],
+      "endpoints": [
+        {"file": "Api/Program.cs", "kind": "http", "role": "provides", "name": "GET /min/users/{}"}
+      ]
+    },
+    "aspnet": {
+      "note": "HttpGet / Route implement IActionHttpMethodProvider / IRouteTemplateProvider in compiled metadata (installed reference packs + the SDK's shared frameworks)",
+      "endpoints": [
+        {"file": "Api/OrdersController.cs", "kind": "http", "role": "provides", "name": "GET /api/orders/{}"}
+      ]
+    },
+    "httpclient": {
+      "calls": [
+        {"file": "Api/Clients.cs", "callee": "client.GetAsync", "symbol": "System.Net.Http.HttpClient.GetAsync"}
+      ],
+      "endpoints": [
+        {"file": "Api/Clients.cs", "kind": "http", "role": "uses", "name": "GET /min/users/1"}
+      ]
+    },
+    "subprocess-ffi": {
+      "calls": [
+        {"file": "Api/Native.cs", "callee": "Process.Start", "symbol": "System.Diagnostics.Process.Start"}
+      ],
+      "endpoints": [
+        {"file": "Api/Native.cs", "kind": "subprocess", "role": "uses", "name": "procs/build.py"},
+        {"file": "Api/Native.cs", "kind": "ffi", "role": "uses", "name": "compress_buf"}
+      ]
+    }
+  }
+}

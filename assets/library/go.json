@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "language": "go",
+  "runtime": "Go standard library (GOROOT/src); only runtime dispatch that the source does not show as a call on a parameter",
+  "conventions": "Symbols are import path + qualified name (fmt.Println, encoding/json.Marshal, net/http.Handler.ServeHTTP). A func value is assignable only to func types or empty interfaces, so every non-top declared parameter type receiving a function is a function type.",
+  "roots": ["fmt", "log", "encoding/json", "encoding/xml", "errors", "sort", "container/heap", "runtime"],
+  "prelude": [],
+  "function_types": ["func"],
+  "top_types": ["any", "interface{}"],
+  "wrapper_types": [],
+  "data_types": [],
+  "entries": [
+    {"symbol": "runtime.SetFinalizer", "kind": "function", "effects": [{"stored_then_called": {"pos": 1}}], "basis": "runtime_dispatch",
+     "describe": "SetFinalizer(obj, finalizer) calls the finalizer when obj becomes unreachable", "why": "the parameter is typed any and the finalizer is run by the garbage collector's finalizer goroutine, not by a call in source"},
+    {"symbol": "fmt.Println", "aliases": ["fmt.Print", "fmt.Sprint", "fmt.Sprintln", "fmt.Append", "fmt.Appendln", "log.Print", "log.Println", "log.Fatal", "log.Fatalln", "log.Panic", "log.Panicln"], "kind": "function",
+     "effects": [{"calls_method": {"arg": {"rest": 0}, "method": "String"}}, {"calls_method": {"arg": {"rest": 0}, "method": "Error"}}, {"calls_method": {"arg": {"rest": 0}, "method": "Format"}}, {"calls_method": {"arg": {"rest": 0}, "method": "GoString"}}], "basis": "runtime_dispatch",
+     "describe": "the print family calls Error(), String(), Format() or GoString() of arguments that have them", "why": "arguments are typed ...any; the methods are reached by type assertion to fmt.Formatter/Stringer/error inside fmt, not by a call on the parameter"},
+    {"symbol": "fmt.Printf", "aliases": ["fmt.Sprintf", "fmt.Errorf", "fmt.Appendf", "fmt.Fprint", "fmt.Fprintln", "log.Printf", "log.Fatalf", "log.Panicf"], "kind": "function",
+     "effects": [{"calls_method": {"arg": {"rest": 1}, "method": "String"}}, {"calls_method": {"arg": {"rest": 1}, "method": "Error"}}, {"calls_method": {"arg": {"rest": 1}, "method": "Format"}}, {"calls_method": {"arg": {"rest": 1}, "method": "GoString"}}], "basis": "runtime_dispatch",
+     "describe": "formatted printing calls Error(), String(), Format() or GoString() of the operands", "why": "operands are typed ...any; the methods are reached by type assertion inside fmt, not by a call on the parameter"},
+    {"symbol": "fmt.Fprintf", "kind": "function",
+     "effects": [{"calls_method": {"arg": {"rest": 2}, "method": "String"}}, {"calls_method": {"arg": {"rest": 2}, "method": "Error"}}, {"calls_method": {"arg": {"rest": 2}, "method": "Format"}}, {"calls_method": {"arg": {"rest": 2}, "method": "GoString"}}], "basis": "runtime_dispatch",
+     "describe": "Fprintf(w, format, operands...) calls Error(), String(), Format() or GoString() of the operands", "why": "operands are typed ...any; the methods are reached by type assertion inside fmt"},
+    {"symbol": "encoding/json.Marshal", "aliases": ["encoding/json.MarshalIndent", "encoding/json.Encoder.Encode"], "kind": "function",
+     "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "MarshalJSON"}}, {"calls_method": {"arg": {"pos": 0}, "method": "MarshalText"}}], "basis": "runtime_dispatch",
+     "describe": "Marshal(v) calls v.MarshalJSON() (else MarshalText()) of values that implement them", "why": "v is typed any; the methods are found through reflection on the value's type"},
+    {"symbol": "encoding/json.Unmarshal", "aliases": ["encoding/json.Decoder.Decode"], "kind": "function",
+     "effects": [{"calls_method": {"arg": "last", "method": "UnmarshalJSON"}}, {"calls_method": {"arg": "last", "method": "UnmarshalText"}}], "basis": "runtime_dispatch",
+     "describe": "Unmarshal(data, v) calls UnmarshalJSON (else UnmarshalText) of the target", "why": "v is typed any; the methods are found through reflection on the value's type"},
+    {"symbol": "encoding/xml.Marshal", "aliases": ["encoding/xml.MarshalIndent", "encoding/xml.Encoder.Encode"], "kind": "function",
+     "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "MarshalXML"}}, {"calls_method": {"arg": {"pos": 0}, "method": "MarshalText"}}], "basis": "runtime_dispatch",
+     "describe": "xml.Marshal(v) calls v.MarshalXML() (else MarshalText())", "why": "v is typed any; the methods are found through reflection on the value's type"},
+    {"symbol": "errors.Is", "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "Is"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Unwrap"}}], "basis": "runtime_dispatch",
+     "describe": "errors.Is(err, target) calls Is and Unwrap of the error chain", "why": "the optional methods are reached by type assertion, not declared on the parameter type"},
+    {"symbol": "errors.As", "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "As"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Unwrap"}}], "basis": "runtime_dispatch",
+     "describe": "errors.As(err, target) calls As and Unwrap of the error chain", "why": "the optional methods are reached by type assertion, not declared on the parameter type"},
+    {"symbol": "errors.Unwrap", "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "Unwrap"}}], "basis": "runtime_dispatch",
+     "describe": "errors.Unwrap(err) calls err.Unwrap()", "why": "the optional method is reached by type assertion"},
+    {"symbol": "sort.Sort", "aliases": ["sort.Stable", "sort.IsSorted"], "kind": "function",
+     "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "Len"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Less"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Swap"}}], "basis": "runtime_dispatch",
+     "describe": "sort.Sort(data) calls data.Len, data.Less and data.Swap", "why": "interface dispatch: the methods of the argument's dynamic type run, which a call on the parameter does not name"},
+    {"symbol": "container/heap.Init", "aliases": ["container/heap.Push", "container/heap.Pop", "container/heap.Fix", "container/heap.Remove"], "kind": "function",
+     "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "Len"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Less"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Swap"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Push"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Pop"}}], "basis": "runtime_dispatch",
+     "describe": "heap operations call Len, Less, Swap, Push and Pop of the heap argument", "why": "interface dispatch: the methods of the argument's dynamic type run"}
+  ],
+  "io_send": [
+    {"symbol": "syscall.Connect", "key": {"pos": 1}, "verb": "any", "why_not_derivable": "compiled_runtime",
+     "describe": "connect system call (net.Dial and net/http derive down to it); below it is assembly"},
+    {"symbol": "syscall.Sendto", "key": "last", "verb": "any", "why_not_derivable": "compiled_runtime",
+     "describe": "sendto system call for datagrams"},
+    {"symbol": "syscall.StartProcess", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime",
+     "describe": "starts a program (os.StartProcess and os/exec derive down to it); below it is the fork/exec system call"},
+    {"symbol": "syscall.Exec", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime",
+     "describe": "execve system call: replaces the process with a program"}
+  ],
+  "io_entry": [
+    {"symbol": "net/http.Handler.ServeHTTP", "pattern": "ServeHTTP/2", "channel": "http", "key": {"field": [1, "URL"]}, "verb": {"field": [1, "Method"]}, "why_not_derivable": "language_spec",
+     "describe": "the net/http server calls ServeHTTP(w, r) of the server's handler for every request; r.URL.Path is the route key, r.Method the verb"},
+    {"symbol": "syscall.Accept", "why_not_derivable": "compiled_runtime",
+     "describe": "accept system call: inbound connections of a server loop"},
+    {"symbol": "syscall.Recvfrom", "why_not_derivable": "compiled_runtime",
+     "describe": "recvfrom system call: a consumer receive loop reads messages here"}
+  ],
+  "route_patterns": [
+    {"pattern": "{name}", "why_not_derivable": "language_spec", "describe": "brace wildcard (net/http ServeMux patterns since Go 1.22)"},
+    {"pattern": "{name...}", "why_not_derivable": "language_spec", "describe": "rest-of-path wildcard (net/http ServeMux)"},
+    {"pattern": ":name", "why_not_derivable": "language_spec", "describe": "colon placeholder"},
+    {"pattern": "*name", "why_not_derivable": "language_spec", "describe": "named catch-all"},
+    {"pattern": "METHOD /path", "why_not_derivable": "language_spec", "describe": "ServeMux pattern with a leading method (\"GET /items/{id}\")"}
+  ],
+  "ffi_conventions": [
+    {"pattern": "//export name", "channel": "ffi", "why_not_derivable": "language_spec",
+     "describe": "cgo: a Go function preceded by //export name is callable from C as name"},
+    {"pattern": "C.name", "channel": "ffi", "why_not_derivable": "language_spec",
+     "describe": "cgo: C.name calls the C function name declared in the import \"C\" preamble"},
+    {"pattern": "//go:wasmexport name", "channel": "ffi", "why_not_derivable": "language_spec",
+     "describe": "the function is a wasm export named name"},
+    {"pattern": "//go:wasmimport module name", "channel": "ffi", "why_not_derivable": "language_spec",
+     "describe": "the function body is the wasm import module.name provided by the host"}
+  ],
+  "test_conventions": [
+    {"glob": "*_test.go", "pattern": "Test*", "why_not_derivable": "language_spec",
+     "describe": "go test runs Test*, Benchmark*, Fuzz* and Example* functions of *_test.go files"}
+  ],
+  "syntax_conventions": [
+    {"rule": "rpc_client_constructor", "bridge": "grpc", "pattern": "New<Service>Client", "why_not_derivable": "generated_code",
+     "describe": "protoc-gen-go-grpc generates New<Service>Client(conn); calls on the client it returns are the service's rpcs"},
+    {"rule": "rpc_server_register", "bridge": "grpc", "pattern": "Register<Service>Server", "why_not_derivable": "generated_code",
+     "describe": "protoc-gen-go-grpc generates Register<Service>Server(server, impl): the methods of impl's type implement the rpcs"},
+    {"rule": "rpc_server_embed", "bridge": "grpc", "pattern": "Unimplemented<Service>Server", "why_not_derivable": "generated_code",
+     "describe": "a struct embedding the generated Unimplemented<Service>Server implements the service's rpcs with its methods"}
+  ]
+}

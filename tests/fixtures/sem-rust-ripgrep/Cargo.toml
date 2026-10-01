@@ -1,0 +1,26 @@
+# ripgrep-shaped fixture for trace-semantic (never built or run; read by rust-analyzer only).
+# Root binary package with its target outside src/, workspace members linked by path
+# dependencies, a feature-gated module (printer `serde`), inherited workspace settings.
+[package]
+name = "rgmini"
+version = "0.1.0"
+edition.workspace = true
+autotests = false
+
+[[bin]]
+name = "rg"
+path = "crates/core/main.rs"
+
+[workspace]
+members = ["crates/ignore", "crates/printer"]
+
+[workspace.package]
+edition = "2021"
+
+[workspace.dependencies]
+grep-printer = { version = "0.1.0", path = "crates/printer" }
+
+[dependencies]
+ignore = { version = "0.1.0", path = "crates/ignore" }
+grep-printer = { workspace = true }
+anyhow = "1.0.75"

@@ -1,0 +1,57 @@
+name: Live servers
+
+# Nightly and on demand, informational: the only workflow that downloads language servers.
+# Installs the default languages from an EMPTY tools folder on every OS with trace's own
+# installer (pinned URLs, sha256, unpacking, exec bits), then runs the live analyzer tests
+# against them. Upstream network problems never turn CI red.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_TOOLCHAIN: "1.92.0"
+
+jobs:
+  live:
+    name: Live (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Windows, os: windows-latest }
+          - { name: Linux, os: ubuntu-latest }
+          - { name: macOS, os: macos-latest }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Empty tools and cache folders
+        shell: bash
+        run: |
+          echo "TRACE_SEMANTIC_TOOLS=$RUNNER_TEMP/trace-tools" >> "$GITHUB_ENV"
+          echo "TRACE_CACHE_DIR=$RUNNER_TEMP/trace-cache" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: live
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+      - name: Build
+        run: cargo build --release --workspace --locked
+      - name: Install the default language servers
+        shell: bash
+        run: |
+          exe=target/release/trace
+          if [ "$RUNNER_OS" = "Windows" ]; then exe="$exe.exe"; fi
+          "$exe" --root tests/fixtures/python status --install default
+      - name: Live analyzer tests
+        run: cargo nextest run --release --locked -p trace-semantic --test live_analyzers

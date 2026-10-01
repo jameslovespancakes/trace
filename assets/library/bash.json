@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "language": "bash",
+  "runtime": "Bash builtins and POSIX utilities (no types, no source)",
+  "conventions": "Symbols are command words, matched by spelling when the word does not resolve to a function. Positions count the words after the command word. {\"code\": i}: word i is a string parsed as Bash commands (tree-sitter-bash). {\"command\": i}: the first word at or after i that is not an option or an assignment starts a command. {\"kw\": \"-F\"}: the word following option -F.",
+  "roots": ["trap", "eval", "time", "complete", "compgen", "mapfile", "readarray", "command", "builtin", "exec", "xargs", "find", "timeout", "nohup", "env", "nice", "sudo", "setsid", "stdbuf", "watch"],
+  "prelude": [],
+  "function_types": ["function"],
+  "top_types": ["string"],
+  "wrapper_types": [],
+  "data_types": [],
+  "entries": [
+    {"symbol": "trap", "kind": "command", "effects": [{"stored_then_called": {"code": 0}}], "basis": "no_source",
+     "describe": "trap 'commands' SIGNAL runs the commands when the signal (EXIT, ERR, INT, DEBUG, RETURN ...) arrives", "why": "Bash builtin: the handler is a string parsed as code at signal time"},
+    {"symbol": "eval", "kind": "command", "effects": [{"calls": {"code": 0}}], "basis": "no_source",
+     "describe": "eval 'commands' runs its (concatenated) arguments as commands now", "why": "Bash builtin: the argument is a string parsed as code"},
+    {"symbol": "time", "kind": "command", "effects": [{"calls": {"command": 0}}], "basis": "no_source",
+     "describe": "time cmd runs cmd (a function too) and reports its duration", "why": "Bash reserved word: no source"},
+    {"symbol": "complete", "aliases": ["compgen"], "kind": "command", "effects": [{"stored_then_called": {"kw": "-F"}}], "basis": "no_source",
+     "describe": "complete -F func name registers func as the completion function of name", "why": "Bash builtin: the function is named by a word"},
+    {"symbol": "mapfile", "aliases": ["readarray"], "kind": "command", "effects": [{"calls": {"kw": "-C"}}], "basis": "no_source",
+     "describe": "mapfile -C func calls func every -c lines while reading", "why": "Bash builtin: the function is named by a word"},
+    {"symbol": "command", "aliases": ["builtin", "exec"], "kind": "command", "effects": [{"never_calls": {"command": 0}}], "basis": "never_calls",
+     "describe": "command/builtin/exec name run a builtin or program named name, never a shell function of that name", "why": "Bash builtin: function lookup is skipped by definition"},
+    {"symbol": "timeout", "kind": "command", "effects": [{"never_calls": {"command": 1}}], "basis": "never_calls",
+     "describe": "timeout DURATION cmd runs cmd as a separate program; a shell function name there is not called", "why": "external program: it execs a file, shell functions are not visible to it"},
+    {"symbol": "xargs", "aliases": ["find", "nohup", "env", "nice", "sudo", "setsid", "stdbuf", "watch"], "kind": "command", "effects": [{"never_calls": {"command": 0}}, {"never_calls": {"kw": "-exec"}}], "basis": "never_calls",
+     "describe": "these run their command as a separate program; a shell function name there is not called (only scripts and programs)", "why": "external programs: they exec a file, shell functions are not visible to them"}
+  ],
+  "io_send": [
+    {"pattern": "simple command", "channel": "process", "key": {"command": 0}, "why_not_derivable": "language_spec",
+     "describe": "a simple command whose word is not a function, alias or builtin runs the program found on PATH (or by path)"}
+  ]
+}

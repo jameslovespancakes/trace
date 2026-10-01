@@ -1,0 +1,86 @@
+{
+  "schema": 2,
+  "backends": [
+    {
+      "id": "lsp:gopls",
+      "kind": "lsp",
+      "languages": [
+        "go"
+      ],
+      "language_ids": [
+        "go"
+      ],
+      "server": {
+        "name": "gopls",
+        "version": "v0.23.0",
+        "license": "BSD-3-Clause"
+      },
+      "executable": {
+        "from": "tool",
+        "tool": "gopls",
+        "path": "bin/gopls"
+      },
+      "args": [
+        "serve"
+      ],
+      "env_set": {
+        "GOPROXY": "off",
+        "GOSUMDB": "off",
+        "GOTOOLCHAIN": "local",
+        "GOTELEMETRY": "off",
+        "GOENV": "off",
+        "GOCACHE": "{outside}/gocache",
+        "CGO_ENABLED": "0",
+        "TEMP": "{tmp}",
+        "TMP": "{tmp}",
+        "TMPDIR": "{tmp}"
+      },
+      "workspace": {
+        "mode": "mirror"
+      },
+      "ready": {
+        "kind": "progress"
+      },
+      "requires_build": {
+        "tool": "cgo",
+        "runs": "the C compiler on its code",
+        "when": "decided_by_hooks"
+      },
+      "toolchain": {
+        "ecosystem": "go",
+        "needs": "Go",
+        "install": "Install it from https://go.dev/dl"
+      },
+      "deps": {
+        "ecosystem": "go"
+      },
+      "install": {
+        "id": "gopls",
+        "version": "v0.23.0",
+        "license": "BSD-3-Clause",
+        "display": "Go language server",
+        "product": "gopls",
+        "recipe": "go_install",
+        "module": "golang.org/x/tools/gopls",
+        "versions": [
+          {
+            "min_go": "1.26.0",
+            "version": "v0.23.0",
+            "h1": "h1:Dn6mf9WXu9iLnTftDDMb9wV0c6Se7PjzEMqP0LEe08Y="
+          },
+          {
+            "min_go": "1.25.0",
+            "version": "v0.21.1",
+            "h1": "h1:1/o9z5Brdero4jFm9Jr46Uwj8GU9lQdoSXHMlwRHb/w="
+          },
+          {
+            "min_go": "1.24.2",
+            "version": "v0.20.0",
+            "h1": "h1:fxOYZXKl6IsOTKIh6IgjDbIDHlr5btOtOUkrGOgFDB4="
+          }
+        ]
+      },
+      "safety": "gopls runs in a mirror of the repository with the user's Go (PATH and GOROOT from the detected toolchain, set by servers/go.rs) and the user's module cache read-only: GOPROXY=off, GOSUMDB=off (no downloads), GOTOOLCHAIN=local (no toolchain switch), GOENV=off (GOMODCACHE / GOPATH passed explicitly), GOTELEMETRY=off, GOCACHE outside the mirror; no GOFLAGS (the default -mod=readonly or vendor applies) and no GOWORK override (go.work is honoured). CGO_ENABLED=0 unless the project has cgo files and trace index --allow-build was given (then CGO_ENABLED=1 runs the C compiler over the cgo preambles). gopls itself is built by `go install` with the user's Go into the tools folder, version chosen by the Go minor, module hashes verified by the Go checksum database."
+    }
+  ]
+}

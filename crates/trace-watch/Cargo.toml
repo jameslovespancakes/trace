@@ -1,0 +1,20 @@
+[package]
+name = "trace-watch"
+description = "trace index --watch: debounced file watcher, warm language servers and incremental updates in the foreground."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+trace-core.workspace = true
+trace-analysis.workspace = true
+notify.workspace = true
+ignore.workspace = true
+anyhow.workspace = true
+# Channel between the watcher thread and the update loop. Exact pin; offline cache.
+crossbeam-channel = "=0.5.15"
+
+[dev-dependencies]
+tempfile.workspace = true

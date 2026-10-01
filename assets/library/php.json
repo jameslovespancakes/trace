@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "language": "php",
+  "runtime": "PHP core and bundled extensions (C; intelephense stubs have no bodies)",
+  "conventions": "Symbols: global functions by name (call_user_func), methods as Class::method. String and array callables ('f', [C::class, 'm'], 'C::m') are named_by selectors.",
+  "roots": ["Closure", "call_user_func", "call_user_func_array", "json_encode", "serialize", "unserialize", "count", "iterator_to_array", "iterator_apply", "strval", "Fiber", "Generator", "forward_static_call", "forward_static_call_array"],
+  "prelude": [],
+  "function_types": ["callable", "Closure", "\\Closure"],
+  "top_types": ["mixed", "object"],
+  "wrapper_types": [],
+  "data_types": [],
+  "entries": [
+    {"symbol": "call_user_func", "aliases": ["call_user_func_array", "forward_static_call", "forward_static_call_array"], "kind": "function", "effects": [{"calls": {"pos": 0}}, {"calls": {"named_by": 0}}], "basis": "no_source",
+     "describe": "call_user_func(callable, ...) calls the callable now (also 'name', [obj, 'm'], 'C::m')", "why": "C builtin: the stub has no body"},
+    {"symbol": "Closure::fromCallable", "kind": "method", "effects": [{"returns": {"pos": 0}}, {"returns": {"named_by": 0}}], "basis": "no_source",
+     "describe": "Closure::fromCallable(callable) returns a Closure that calls it", "why": "C builtin: the stub has no body"},
+    {"symbol": "Closure::bind", "kind": "method", "effects": [{"partial": {"pos": 0}}], "basis": "no_source",
+     "describe": "Closure::bind(closure, newThis) returns a copy of the closure bound to another object", "why": "C builtin: the stub has no body"},
+    {"symbol": "Closure::bindTo", "kind": "method", "effects": [{"partial": "receiver"}], "basis": "no_source",
+     "describe": "closure->bindTo(newThis) returns a copy of the closure bound to another object", "why": "C builtin: the stub has no body"},
+    {"symbol": "Closure::call", "aliases": ["Closure::__invoke"], "kind": "method", "effects": [{"calls": "receiver"}], "basis": "no_source",
+     "describe": "closure->call(newThis, ...) calls the closure now", "why": "C builtin: the stub has no body"},
+    {"symbol": "json_encode", "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "jsonSerialize"}}], "basis": "no_source",
+     "describe": "json_encode(value) calls JsonSerializable::jsonSerialize() of objects", "why": "C builtin: the value is typed mixed"},
+    {"symbol": "serialize", "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "__serialize"}}, {"calls_method": {"arg": {"pos": 0}, "method": "__sleep"}}], "basis": "no_source",
+     "describe": "serialize(value) calls __serialize() (else __sleep()) of objects", "why": "C builtin: magic methods are dispatched by name"},
+    {"symbol": "count", "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "count"}}], "basis": "no_source",
+     "describe": "count($o) calls Countable::count() of objects", "why": "C builtin: the value is typed Countable|array"},
+    {"symbol": "iterator_to_array", "aliases": ["iterator_apply"], "kind": "function", "effects": [{"iterates": {"pos": 0}}, {"calls_method": {"arg": {"pos": 0}, "method": "getIterator"}}], "basis": "no_source",
+     "describe": "iterates a Traversable (IteratorAggregate::getIterator or Iterator methods)", "why": "C builtin: the iteration protocol is not a parameter type"},
+    {"symbol": "strval", "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "__toString"}}], "basis": "no_source",
+     "describe": "strval($o) calls __toString()", "why": "C builtin: magic method dispatched by name"},
+    {"symbol": "Fiber::__construct", "kind": "method", "effects": [{"stored_then_called": {"pos": 0}}], "basis": "timing",
+     "describe": "new Fiber(callable) runs the callable when start() is called", "why": "the callable type says it may run, not that it runs later on start()"},
+    {"symbol": "Generator::send", "aliases": ["Generator::next", "Generator::current", "Generator::rewind"], "kind": "method", "effects": [{"advances": "receiver"}], "basis": "no_source",
+     "describe": "resumes the generator body up to the next yield", "why": "C builtin: the stub has no body"}
+  ],
+  "io_send": [
+    {"symbol": "curl_init", "channel": "http", "key": {"pos": 0}, "verb": "any", "why_not_derivable": "compiled_runtime", "describe": "curl_init(url) prepares a request to url (ext/curl)"},
+    {"symbol": "curl_setopt", "channel": "http", "key": {"pos": 2}, "verb": "any", "why_not_derivable": "compiled_runtime", "describe": "curl_setopt($ch, CURLOPT_URL, url) sets the request URL (CURLOPT_CUSTOMREQUEST the verb)"},
+    {"symbol": "file_get_contents", "channel": "http", "key": {"pos": 0}, "verb": "GET", "why_not_derivable": "compiled_runtime", "describe": "file_get_contents(url) reads an http(s):// URL through the stream wrapper"},
+    {"symbol": "fsockopen", "key": {"pos": 0}, "verb": "any", "why_not_derivable": "compiled_runtime", "describe": "fsockopen(host, port) opens a raw socket"},
+    {"symbol": "stream_socket_client", "key": {"pos": 0}, "verb": "any", "why_not_derivable": "compiled_runtime", "describe": "stream_socket_client(address) opens a socket"},
+    {"symbol": "proc_open", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime", "describe": "proc_open(command, ...) starts a program"},
+    {"symbol": "exec", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime", "describe": "exec(command) runs a shell command line"},
+    {"symbol": "shell_exec", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime", "describe": "shell_exec(command) runs a shell command line"},
+    {"symbol": "system", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime", "describe": "system(command) runs a shell command line"},
+    {"symbol": "passthru", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime", "describe": "passthru(command) runs a shell command line"},
+    {"symbol": "popen", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime", "describe": "popen(command, mode) runs a shell command line with a pipe"}
+  ],
+  "io_entry": [
+    {"pattern": "$_SERVER['REQUEST_URI']", "channel": "http", "key": {"field": [0, "REQUEST_URI"]}, "verb": {"field": [0, "REQUEST_METHOD"]}, "why_not_derivable": "language_spec",
+     "describe": "PHP SAPI: the web server runs the entry script (front controller) for every request; the route key is $_SERVER['REQUEST_URI'] / PATH_INFO, the verb $_SERVER['REQUEST_METHOD']"}
+  ],
+  "route_patterns": [
+    {"pattern": "{name}", "why_not_derivable": "language_spec", "describe": "brace placeholder"},
+    {"pattern": "{name?}", "why_not_derivable": "language_spec", "describe": "optional brace placeholder"},
+    {"pattern": "{name:regex}", "why_not_derivable": "language_spec", "describe": "brace placeholder with a pattern"}
+  ],
+  "ffi_conventions": [
+    {"symbol": "FFI::cdef", "channel": "ffi", "key": {"pos": 1}, "why_not_derivable": "compiled_runtime", "describe": "FFI::cdef(declarations, library): functions declared there call the library's C exports"}
+  ],
+  "test_conventions": [
+    {"glob": "tests/**/*Test.php", "pattern": "test*", "activated_by": "phpunit/phpunit", "why_not_derivable": "reflection",
+     "describe": "PHPUnit: public methods test* (or #[Test]) of TestCase subclasses in *Test.php, when phpunit.xml does not define test suites"}
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "packages": {"composer": ["laravel/framework:11.5.0"]},
+  "expect": "ok"
+}

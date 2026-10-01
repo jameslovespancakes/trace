@@ -1,0 +1,25 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): Laravel routes (facade -> container -> router: runtime dispatch by name) and PHP process functions (io_send rows).",
+  "roots": [
+    {"path": "vendor", "ecosystem": "php", "layout": "php_vendor"}
+  ],
+  "families": {
+    "laravel": {
+      "note": "Route::get reaches the router through Facade::__callStatic and the container (resolved by name at run time)",
+      "calls": [
+        {"file": "routes/web.php", "callee": "Route::get", "target": {"file": "laravel/framework/src/Illuminate/Routing/Router.php", "text": "public function get($uri, $action = null)"}}
+      ],
+      "endpoints": [
+        {"file": "routes/web.php", "kind": "http", "role": "provides", "name": "GET /laravel/users/{}"}
+      ]
+    },
+    "subprocess": {
+      "calls": [
+        {"file": "scripts/run.php", "callee": "exec", "symbol": "exec"}
+      ],
+      "endpoints": [
+        {"file": "scripts/run.php", "kind": "subprocess", "role": "uses", "name": "scripts/job.php"}
+      ]
+    }
+  }
+}

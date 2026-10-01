@@ -1,0 +1,25 @@
+# Fixture (P5, openapi): the declared contract (YAML, read by the block-YAML reader).
+openapi: 3.0.3
+info:
+  title: Items
+  version: "1.0"
+servers:
+  - url: http://localhost:8000/api
+paths:
+  /items/{item_id}:
+    get:
+      operationId: read_item
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        "200":
+          description: OK
+  /items:
+    post:
+      operationId: create_item
+      responses:
+        "201":
+          description: Created

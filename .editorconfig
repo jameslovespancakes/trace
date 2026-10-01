@@ -1,0 +1,27 @@
+# Editor settings (https://editorconfig.org): UTF-8, LF, final newline; 4 spaces for Rust,
+# Python and TOML, 2 spaces for JSON, JavaScript / TypeScript, YAML, Markdown and queries.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,jsonc,js,mjs,cjs,ts,tsx,yml,yaml,md,scm}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Test repositories keep their bytes exactly (tests assert byte offsets).
+[tests/fixtures/**]
+indent_size = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+# Kept with CRLF line endings (see .gitattributes).
+[assets/ts-worker/fntype.mjs]
+end_of_line = crlf

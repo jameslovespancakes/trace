@@ -1,0 +1,25 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): NestJS decorators (metadata stored with reflect-metadata, a reflection_roots row) and the Angular HttpClient.",
+  "roots": [
+    {"path": "node_modules", "ecosystem": "node", "layout": "node_modules"}
+  ],
+  "families": {
+    "nestjs": {
+      "calls": [
+        {"file": "src/users.controller.ts", "callee": "Get", "target": {"file": "@nestjs/common/decorators/http/request-mapping.decorator.js", "text": "exports.Get = createMappingDecorator"}},
+        {"file": "src/users.controller.ts", "callee": "Controller", "target": {"file": "@nestjs/common/decorators/core/controller.decorator.js", "text": "function Controller("}}
+      ],
+      "endpoints": [
+        {"file": "src/users.controller.ts", "kind": "http", "role": "provides", "name": "GET /nest/users/{}"}
+      ]
+    },
+    "angular-httpclient": {
+      "calls": [
+        {"file": "src/users.service.ts", "callee": "this.http.get", "target": {"file": "@angular/common/fesm2022/http.mjs", "text": "get(url, options = {})"}}
+      ],
+      "endpoints": [
+        {"file": "src/users.service.ts", "kind": "http", "role": "uses", "name": "GET /nest/users/{}"}
+      ]
+    }
+  }
+}

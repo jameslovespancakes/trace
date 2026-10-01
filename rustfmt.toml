@@ -1,0 +1,7 @@
+# Formatting (cargo fmt --all). The widths keep today's hand-written layout where it is already
+# consistent (fewest reformatted lines of the candidate configurations).
+max_width = 110
+fn_call_width = 100
+chain_width = 70
+array_width = 80
+single_line_let_else_max_width = 100

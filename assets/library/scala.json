@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "language": "scala",
+  "runtime": "Scala standard library (JDK callees use the java table); functions and by-name parameters are typed",
+  "conventions": "Symbols are package-qualified (scala.Predef.println). Function types A => B, context functions ?=>, by-name parameters => A and SAM types are function types; Any/AnyRef are top types.",
+  "roots": ["scala"],
+  "prelude": ["scala.Predef"],
+  "function_types": ["scala.Function0", "scala.Function1", "scala.Function2", "scala.Function3", "scala.PartialFunction", "java.lang.Runnable", "java.util.function.Function"],
+  "top_types": ["scala.Any", "Any", "scala.AnyRef", "AnyRef", "Object", "java.lang.Object"],
+  "wrapper_types": ["scala.Option", "Option"],
+  "data_types": [],
+  "entries": [
+    {"symbol": "scala.Predef.println", "aliases": ["scala.Predef.print"], "kind": "function", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "toString"}}], "basis": "language_spec",
+     "describe": "println(x) calls x.toString()", "why": "the parameter is typed Any; toString is dispatched on the argument's class"},
+    {"symbol": "scala.concurrent.Future.apply", "kind": "method", "effects": [{"stored_then_called": {"pos": 0}}], "basis": "timing",
+     "describe": "Future { body } runs the by-name body later on the implicit ExecutionContext", "why": "the by-name type says the body may run, not that it runs later on another thread"},
+    {"symbol": "scala.util.Using.resource", "aliases": ["scala.util.Using.apply"], "kind": "method", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "close"}}], "basis": "language_spec",
+     "describe": "Using.resource(r)(f) runs f and then releases r through the implicit Releasable (close())", "why": "the release goes through an implicitly selected type class instance"}
+  ],
+  "route_patterns": [
+    {"pattern": "{name}", "why_not_derivable": "language_spec", "describe": "brace placeholder"},
+    {"pattern": ":name", "why_not_derivable": "language_spec", "describe": "colon placeholder"},
+    {"pattern": "*name", "why_not_derivable": "language_spec", "describe": "rest-of-path placeholder"}
+  ],
+  "ffi_conventions": [
+    {"pattern": "@native def", "channel": "ffi", "why_not_derivable": "language_spec",
+     "describe": "JNI: a @native method of class p.C is implemented by the C symbol Java_p_C_name"}
+  ],
+  "test_conventions": [
+    {"glob": "src/test/scala/**/*.scala", "activated_by": "org.scalameta:munit", "why_not_derivable": "reflection",
+     "describe": "MUnit suites (classes extending munit.FunSuite) in the sbt test source set; test(\"name\") bodies are run by the runner"},
+    {"glob": "src/test/scala/**/*.scala", "activated_by": "org.scalatest:scalatest", "why_not_derivable": "reflection",
+     "describe": "ScalaTest suites in the sbt test source set; test/it/should bodies are run by the runner"}
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): the old table families of Python. calls = what the language server resolves each call to (declaration in the installed package, or the runtime symbol of a primitive); endpoints = what the old tables produced.",
+  "roots": [
+    {"find": "site-packages", "ecosystem": "python", "layout": "site_packages"},
+    {"command": ["python", "-c", "import sysconfig; print(sysconfig.get_paths()['stdlib'])"], "ecosystem": "python", "layout": "toolchain_stdlib", "stdlib": true}
+  ],
+  "families": {
+    "flask": {
+      "calls": [
+        {"file": "web/flask_app.py", "callee": "app.route", "target": {"root": 0, "file": "flask/sansio/scaffold.py", "qualified": "Scaffold.route"}}
+      ],
+      "endpoints": [
+        {"file": "web/flask_app.py", "kind": "http", "role": "provides", "name": "GET /flask/users/{}"}
+      ]
+    },
+    "fastapi": {
+      "calls": [
+        {"file": "web/fastapi_app.py", "callee": "app.get", "target": {"root": 0, "file": "fastapi/applications.py", "qualified": "FastAPI.get"}},
+        {"file": "web/fastapi_app.py", "callee": "router.get", "target": {"root": 0, "file": "fastapi/routing.py", "qualified": "APIRouter.get"}},
+        {"file": "web/fastapi_app.py", "callee": "app.include_router", "target": {"root": 0, "file": "fastapi/applications.py", "qualified": "FastAPI.include_router"}}
+      ],
+      "endpoints": [
+        {"file": "web/fastapi_app.py", "kind": "http", "role": "provides", "name": "GET /fapi/items/{}"},
+        {"file": "web/fastapi_app.py", "kind": "http", "role": "provides", "name": "GET /status"},
+        {"file": "web/fastapi_app.py", "kind": "http", "role": "provides", "name": "MOUNT /v1"}
+      ]
+    },
+    "django": {
+      "calls": [
+        {"file": "web/django_urls.py", "callee": "path", "target": {"root": 0, "file": "django/urls/conf.py", "text": "def _path("}}
+      ],
+      "endpoints": [
+        {"file": "web/django_urls.py", "kind": "http", "role": "provides", "name": "* /django/items/{}"}
+      ]
+    },
+    "starlette": {
+      "calls": [
+        {"file": "web/starlette_app.py", "callee": "Route", "target": {"root": 0, "file": "starlette/routing.py", "qualified": "Route.__init__"}}
+      ],
+      "endpoints": [
+        {"file": "web/starlette_app.py", "kind": "http", "role": "provides", "name": "GET /starlette/ping"}
+      ]
+    },
+    "requests": {
+      "calls": [
+        {"file": "clients/http_clients.py", "callee": "requests.get", "target": {"root": 0, "file": "requests/api.py", "qualified": "get"}}
+      ],
+      "endpoints": [
+        {"file": "clients/http_clients.py", "kind": "http", "role": "uses", "name": "GET /flask/users/1"}
+      ]
+    },
+    "httpx": {
+      "calls": [
+        {"file": "clients/http_clients.py", "callee": "httpx.post", "target": {"root": 0, "file": "httpx/_api.py", "qualified": "post"}}
+      ],
+      "endpoints": [
+        {"file": "clients/http_clients.py", "kind": "http", "role": "uses", "name": "POST /fapi/items/1"}
+      ]
+    },
+    "aiohttp": {
+      "calls": [
+        {"file": "clients/http_clients.py", "callee": "session.get", "target": {"root": 0, "file": "aiohttp/client.py", "qualified": "ClientSession.get"}}
+      ],
+      "endpoints": [
+        {"file": "clients/http_clients.py", "kind": "http", "role": "uses", "name": "GET /starlette/ping"}
+      ]
+    },
+    "urllib": {
+      "calls": [
+        {"file": "clients/http_clients.py", "callee": "urllib.request.urlopen", "target": {"root": 1, "file": "urllib/request.py", "qualified": "urlopen"}}
+      ],
+      "endpoints": [
+        {"file": "clients/http_clients.py", "kind": "http", "role": "uses", "name": "GET /django/items/3"}
+      ]
+    },
+    "python-socketio": {
+      "calls": [
+        {"file": "messaging/pubsub.py", "callee": "sio.on", "target": {"root": 0, "file": "socketio/base_server.py", "qualified": "BaseServer.on"}},
+        {"file": "messaging/pubsub.py", "callee": "sio.emit", "target": {"root": 0, "file": "socketio/server.py", "qualified": "Server.emit"}}
+      ],
+      "endpoints": [
+        {"file": "messaging/pubsub.py", "kind": "message", "role": "provides", "name": "chat"},
+        {"file": "messaging/pubsub.py", "kind": "message", "role": "uses", "name": "chat"}
+      ]
+    },
+    "redis": {
+      "calls": [
+        {"file": "messaging/pubsub.py", "callee": "r.publish", "target": {"root": 0, "file": "redis/commands/core.py", "qualified": "PubSubCommands.publish"}}
+      ],
+      "endpoints": [
+        {"file": "messaging/pubsub.py", "kind": "message", "role": "uses", "name": "orders"}
+      ]
+    },
+    "kafka": {
+      "calls": [
+        {"file": "messaging/pubsub.py", "callee": "producer.send", "target": {"root": 0, "file": "kafka/producer/kafka.py", "qualified": "KafkaProducer.send"}}
+      ],
+      "endpoints": [
+        {"file": "messaging/pubsub.py", "kind": "message", "role": "uses", "name": "events"}
+      ]
+    },
+    "celery": {
+      "calls": [
+        {"file": "messaging/pubsub.py", "callee": "celery_app.send_task", "target": {"root": 0, "file": "celery/app/base.py", "qualified": "Celery.send_task"}}
+      ],
+      "endpoints": [
+        {"file": "messaging/pubsub.py", "kind": "message", "role": "uses", "name": "tasks.add"}
+      ]
+    },
+    "amqp": {
+      "calls": [
+        {"file": "messaging/pubsub.py", "callee": "channel.basic_publish", "target": {"root": 0, "file": "pika/adapters/blocking_connection.py", "qualified": "BlockingChannel.basic_publish"}},
+        {"file": "messaging/pubsub.py", "callee": "channel.basic_consume", "target": {"root": 0, "file": "pika/adapters/blocking_connection.py", "qualified": "BlockingChannel.basic_consume"}}
+      ],
+      "endpoints": [
+        {"file": "messaging/pubsub.py", "kind": "message", "role": "uses", "name": "jobs"},
+        {"file": "messaging/pubsub.py", "kind": "message", "role": "provides", "name": "jobs"}
+      ]
+    },
+    "subprocess": {
+      "calls": [
+        {"file": "procs/run.py", "callee": "subprocess.run", "target": {"root": 1, "file": "subprocess.py", "qualified": "run"}}
+      ],
+      "endpoints": [
+        {"file": "procs/run.py", "kind": "subprocess", "role": "uses", "name": "procs/job.py"}
+      ],
+      "bridges": [
+        {"kind": "subprocess", "from": "procs/run.py:main", "to": "procs/job.py:<module>"}
+      ]
+    },
+    "ctypes": {
+      "note": "symbol looked up through CDLL.__getattr__ by the attribute name",
+      "calls": [
+        {"file": "native/ffi_use.py", "callee": "lib.compress_buf", "target": {"root": 1, "file": "ctypes/__init__.py", "text": "def __getattr__(self, name)"}}
+      ],
+      "endpoints": [
+        {"file": "native/ffi_use.py", "kind": "ffi", "role": "uses", "name": "compress_buf"}
+      ]
+    },
+    "cffi": {
+      "note": "symbol looked up on the library object returned by FFI.dlopen by the attribute name",
+      "calls": [
+        {"file": "native/ffi_use.py", "callee": "ffi.dlopen", "target": {"root": 0, "file": "cffi/api.py", "qualified": "FFI.dlopen"}}
+      ],
+      "endpoints": [
+        {"file": "native/ffi_use.py", "kind": "ffi", "role": "uses", "name": "compress_buf"}
+      ]
+    }
+  }
+}

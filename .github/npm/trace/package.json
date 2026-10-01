@@ -1,0 +1,32 @@
+{
+  "name": "@jameslovespancakes/trace",
+  "version": "0.0.0",
+  "description": "What code uses, what it uses, and how it connects: exact code, every use, dependencies with their conditions and paths, for AI agents and people. 14 languages, read-only.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jameslovespancakes/trace.git"
+  },
+  "homepage": "https://github.com/jameslovespancakes/trace#readme",
+  "bugs": "https://github.com/jameslovespancakes/trace/issues",
+  "keywords": [
+    "code-navigation",
+    "call-graph",
+    "impact-analysis",
+    "language-server",
+    "ai-agents",
+    "static-analysis",
+    "cli"
+  ],
+  "bin": {
+    "trace": "bin/trace.js"
+  },
+  "files": [
+    "bin/",
+    "lib/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "optionalDependencies": {}
+}

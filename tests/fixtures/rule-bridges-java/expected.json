@@ -1,0 +1,38 @@
+{
+  "about": "Bridges gate (DESIGN-bridges 6.2): Java annotation routes (reflection_roots rows; composed annotations need the annotation declarations), JDK / okhttp clients (compiled: io_send rows or no source) and ProcessBuilder (io_send row).",
+  "roots": [
+    {"env": "MAVEN_REPOSITORY", "home": ".m2/repository", "ecosystem": "jvm", "layout": "maven_repo"}
+  ],
+  "families": {
+    "spring": {
+      "note": "@GetMapping reaches the root only through its declaration (spring-web sources)",
+      "endpoints": [
+        {"file": "src/main/java/demo/SpringController.java", "kind": "http", "role": "provides", "name": "GET /spring/orders/{}"},
+        {"file": "src/main/java/demo/SpringController.java", "kind": "http", "role": "provides", "name": "GET /spring/users/{}"}
+      ]
+    },
+    "jaxrs": {
+      "endpoints": [
+        {"file": "src/main/java/demo/JaxrsResource.java", "kind": "http", "role": "provides", "name": "GET /jaxrs/items/{}"}
+      ]
+    },
+    "clients": {
+      "note": "the URL is a field of a request object built by a builder (no source for the compiled client)",
+      "calls": [
+        {"file": "src/main/java/demo/Clients.java", "callee": "HttpClient.newHttpClient().send", "symbol": "java.net.http.HttpClient.send"}
+      ],
+      "endpoints": [
+        {"file": "src/main/java/demo/Clients.java", "kind": "http", "role": "uses", "name": "GET /spring/users/1"},
+        {"file": "src/main/java/demo/Clients.java", "kind": "http", "role": "uses", "name": "GET /jaxrs/items/2"}
+      ]
+    },
+    "subprocess": {
+      "calls": [
+        {"file": "src/main/java/demo/Procs.java", "callee": "ProcessBuilder", "symbol": "java.lang.ProcessBuilder"}
+      ],
+      "endpoints": [
+        {"file": "src/main/java/demo/Procs.java", "kind": "subprocess", "role": "uses", "name": "procs/build.py"}
+      ]
+    }
+  }
+}

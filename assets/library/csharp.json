@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "language": "csharp",
+  "runtime": ".NET base class library (compiled assemblies, no source)",
+  "conventions": "Symbols are namespace + type + member without generic arity (System.Lazy, System.Linq.Enumerable.Select); constructors use the type. A method group converts only to a delegate type or object, so every non-top parameter type receiving a method is a function type, except Expression<...> (data).",
+  "roots": ["System"],
+  "prelude": [],
+  "function_types": ["System.Delegate", "System.MulticastDelegate", "System.Action", "System.Func", "System.Predicate", "System.Comparison", "System.Converter", "System.EventHandler", "System.Threading.ThreadStart", "System.Threading.ParameterizedThreadStart", "System.Threading.TimerCallback", "System.Threading.WaitCallback", "System.AsyncCallback"],
+  "top_types": ["System.Object", "object", "dynamic"],
+  "wrapper_types": ["System.Nullable"],
+  "data_types": ["System.Linq.Expressions.Expression", "System.Linq.Expressions.LambdaExpression"],
+  "entries": [
+    {"symbol": "System.Lazy", "kind": "constructor", "effects": [{"property": {"pos": 0}}], "basis": "timing",
+     "describe": "new Lazy<T>(factory) runs the factory on the first read of .Value", "why": "the delegate type says the factory may run, not that it runs on first property access"},
+    {"symbol": "System.Linq.Enumerable.Select", "aliases": ["System.Linq.Enumerable.Where", "System.Linq.Enumerable.SelectMany", "System.Linq.Enumerable.OrderBy", "System.Linq.Enumerable.OrderByDescending", "System.Linq.Enumerable.ThenBy", "System.Linq.Enumerable.GroupBy", "System.Linq.Enumerable.TakeWhile", "System.Linq.Enumerable.SkipWhile"], "kind": "method", "effects": [{"stored_then_called": {"pos": 0}}], "basis": "timing",
+     "describe": "deferred LINQ operators call the selector later, when the result is enumerated", "why": "the delegate type says the selector may run, not that it runs only on enumeration"},
+    {"symbol": "System.Console.WriteLine", "aliases": ["System.Console.Write", "System.String.Concat", "System.Text.StringBuilder.Append", "System.IO.TextWriter.WriteLine", "System.IO.TextWriter.Write"], "kind": "method", "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "ToString"}}], "basis": "language_spec",
+     "describe": "writing an object argument calls its ToString()", "why": "the parameter is typed object; ToString is dispatched on the argument's class"},
+    {"symbol": "System.Collections.Generic.Dictionary.Add", "aliases": ["System.Collections.Generic.Dictionary.TryGetValue", "System.Collections.Generic.Dictionary.ContainsKey", "System.Collections.Generic.Dictionary.Remove", "System.Collections.Generic.HashSet.Add", "System.Collections.Generic.HashSet.Contains", "System.Collections.Generic.HashSet.Remove"], "kind": "method",
+     "effects": [{"calls_method": {"arg": {"pos": 0}, "method": "GetHashCode"}}, {"calls_method": {"arg": {"pos": 0}, "method": "Equals"}}], "basis": "language_spec",
+     "describe": "hash collections call GetHashCode() and Equals() of the key (default comparer)", "why": "the key is typed TKey; the calls go through EqualityComparer<T>.Default"},
+    {"symbol": "System.Threading.Thread.Start", "kind": "method", "effects": [{"calls_method": {"arg": "receiver", "method": "Invoke"}}], "basis": "timing",
+     "describe": "thread.Start() runs the ThreadStart delegate given to the constructor on a new thread", "why": "the delegate is stored by the constructor and run by the runtime's native thread entry"}
+  ],
+  "io_send": [
+    {"symbol": "System.Net.Http.HttpClient.GetAsync", "channel": "http", "key": {"pos": 0}, "verb": "GET", "why_not_derivable": "no_source", "describe": "HttpClient.GetAsync(uri) sends a GET request (compiled BCL)"},
+    {"symbol": "System.Net.Http.HttpClient.GetStringAsync", "channel": "http", "key": {"pos": 0}, "verb": "GET", "why_not_derivable": "no_source", "describe": "HttpClient.GetStringAsync(uri) sends a GET request"},
+    {"symbol": "System.Net.Http.HttpClient.GetStreamAsync", "channel": "http", "key": {"pos": 0}, "verb": "GET", "why_not_derivable": "no_source", "describe": "HttpClient.GetStreamAsync(uri) sends a GET request"},
+    {"symbol": "System.Net.Http.HttpClient.GetByteArrayAsync", "channel": "http", "key": {"pos": 0}, "verb": "GET", "why_not_derivable": "no_source", "describe": "HttpClient.GetByteArrayAsync(uri) sends a GET request"},
+    {"symbol": "System.Net.Http.HttpClient.PostAsync", "channel": "http", "key": {"pos": 0}, "verb": "POST", "why_not_derivable": "no_source", "describe": "HttpClient.PostAsync(uri, content) sends a POST request"},
+    {"symbol": "System.Net.Http.HttpClient.PutAsync", "channel": "http", "key": {"pos": 0}, "verb": "PUT", "why_not_derivable": "no_source", "describe": "HttpClient.PutAsync(uri, content) sends a PUT request"},
+    {"symbol": "System.Net.Http.HttpClient.PatchAsync", "channel": "http", "key": {"pos": 0}, "verb": "PATCH", "why_not_derivable": "no_source", "describe": "HttpClient.PatchAsync(uri, content) sends a PATCH request"},
+    {"symbol": "System.Net.Http.HttpClient.DeleteAsync", "channel": "http", "key": {"pos": 0}, "verb": "DELETE", "why_not_derivable": "no_source", "describe": "HttpClient.DeleteAsync(uri) sends a DELETE request"},
+    {"symbol": "System.Net.Http.HttpClient.SendAsync", "channel": "http", "key": {"field": [0, "RequestUri"]}, "verb": {"field": [0, "Method"]}, "why_not_derivable": "no_source", "describe": "HttpClient.SendAsync(request) sends request.Method to request.RequestUri"},
+    {"symbol": "System.Net.Http.HttpRequestMessage", "channel": "http", "key": {"pos": 1}, "verb": {"pos": 0}, "why_not_derivable": "no_source", "describe": "new HttpRequestMessage(method, uri) prepares a request"},
+    {"symbol": "System.Net.Sockets.Socket.Connect", "key": {"pos": 0}, "verb": "any", "why_not_derivable": "no_source", "describe": "socket.Connect(endpoint) opens a raw socket"},
+    {"symbol": "System.Diagnostics.Process.Start", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "no_source", "describe": "Process.Start(fileName | startInfo) starts a program"}
+  ],
+  "io_entry": [
+    {"symbol": "Microsoft.AspNetCore.Builder.EndpointRouteBuilderExtensions.MapGet", "channel": "http", "key": {"pos": 0}, "handler": {"pos": 1}, "verb": "GET", "why_not_derivable": "no_source", "describe": "minimal API: app.MapGet(pattern, handler) dispatches GET requests to the handler (compiled ASP.NET Core)"},
+    {"symbol": "Microsoft.AspNetCore.Builder.EndpointRouteBuilderExtensions.MapPost", "channel": "http", "key": {"pos": 0}, "handler": {"pos": 1}, "verb": "POST", "why_not_derivable": "no_source", "describe": "minimal API: app.MapPost(pattern, handler)"},
+    {"symbol": "Microsoft.AspNetCore.Builder.EndpointRouteBuilderExtensions.MapPut", "channel": "http", "key": {"pos": 0}, "handler": {"pos": 1}, "verb": "PUT", "why_not_derivable": "no_source", "describe": "minimal API: app.MapPut(pattern, handler)"},
+    {"symbol": "Microsoft.AspNetCore.Builder.EndpointRouteBuilderExtensions.MapPatch", "channel": "http", "key": {"pos": 0}, "handler": {"pos": 1}, "verb": "PATCH", "why_not_derivable": "no_source", "describe": "minimal API: app.MapPatch(pattern, handler)"},
+    {"symbol": "Microsoft.AspNetCore.Builder.EndpointRouteBuilderExtensions.MapDelete", "channel": "http", "key": {"pos": 0}, "handler": {"pos": 1}, "verb": "DELETE", "why_not_derivable": "no_source", "describe": "minimal API: app.MapDelete(pattern, handler)"},
+    {"symbol": "Microsoft.AspNetCore.Builder.EndpointRouteBuilderExtensions.MapMethods", "channel": "http", "key": {"pos": 0}, "handler": {"pos": 2}, "verb": {"pos": 1}, "why_not_derivable": "no_source", "describe": "minimal API: app.MapMethods(pattern, methods, handler)"}
+  ],
+  "reflection_roots": [
+    {"symbol": "Microsoft.AspNetCore.Mvc.Routing.IRouteTemplateProvider", "channel": "http", "key": {"kw": "Template"}, "why_not_derivable": "reflection",
+     "describe": "MVC scans controller actions whose attributes implement IRouteTemplateProvider ([Route], [HttpGet(\"t\")], ...)"},
+    {"symbol": "Microsoft.AspNetCore.Mvc.Routing.IActionHttpMethodProvider", "channel": "http", "verb": {"kw": "HttpMethods"}, "why_not_derivable": "reflection",
+     "describe": "MVC reads the verbs of action attributes implementing IActionHttpMethodProvider ([HttpGet], [HttpPost], ...)"}
+  ],
+  "route_patterns": [
+    {"pattern": "{name}", "why_not_derivable": "language_spec", "describe": "route parameter"},
+    {"pattern": "{name:constraint}", "why_not_derivable": "language_spec", "describe": "route parameter with a constraint"},
+    {"pattern": "{name?}", "why_not_derivable": "language_spec", "describe": "optional route parameter"},
+    {"pattern": "{*name}", "why_not_derivable": "language_spec", "describe": "catch-all route parameter"},
+    {"pattern": "[controller]", "why_not_derivable": "language_spec", "describe": "token replaced by the controller name (without the Controller suffix)"},
+    {"pattern": "[action]", "why_not_derivable": "language_spec", "describe": "token replaced by the action name"}
+  ],
+  "ffi_conventions": [
+    {"symbol": "System.Runtime.InteropServices.DllImportAttribute", "channel": "ffi", "key": {"pos": 0}, "why_not_derivable": "language_spec",
+     "describe": "P/Invoke: an extern method with [DllImport(\"lib\")] calls the native export of the same name (or EntryPoint)"},
+    {"symbol": "System.Runtime.InteropServices.LibraryImportAttribute", "channel": "ffi", "key": {"pos": 0}, "why_not_derivable": "language_spec",
+     "describe": "source-generated P/Invoke: [LibraryImport(\"lib\")] partial methods call the native export"},
+    {"symbol": "System.Runtime.InteropServices.UnmanagedCallersOnlyAttribute", "channel": "ffi", "key": {"kw": "EntryPoint"}, "why_not_derivable": "language_spec",
+     "describe": "NativeAOT: [UnmanagedCallersOnly(EntryPoint = \"name\")] exports the method to native callers"}
+  ],
+  "test_conventions": [
+    {"symbol": "Xunit.FactAttribute", "activated_by": "xunit.core", "why_not_derivable": "reflection", "describe": "xUnit runs methods marked [Fact] and [Theory]"},
+    {"symbol": "NUnit.Framework.TestAttribute", "activated_by": "NUnit", "why_not_derivable": "reflection", "describe": "NUnit runs methods marked [Test], [TestCase]"},
+    {"symbol": "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute", "activated_by": "MSTest.TestFramework", "why_not_derivable": "reflection", "describe": "MSTest runs methods marked [TestMethod]"}
+  ],
+  "syntax_conventions": [
+    {"rule": "rpc_client_type", "bridge": "grpc", "pattern": "<Service>Client", "why_not_derivable": "generated_code",
+     "describe": "Grpc.Tools generates the nested client class <Service>.<Service>Client (constructed with the channel); calls on it are the service's rpcs"},
+    {"rule": "rpc_server_base", "bridge": "grpc", "pattern": "<Service>Base", "why_not_derivable": "generated_code",
+     "describe": "a subclass of the generated <Service>.<Service>Base implements the service's rpcs"}
+  ]
+}

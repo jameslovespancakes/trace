@@ -1,0 +1,20 @@
+# Build output
+/target/
+# Installed binary (build with `cargo build --release`, then copy target/release/trace[.exe])
+/bin/*
+!/bin/.gitkeep
+# Pinned language servers (TRACE_SEMANTIC_TOOLS=tools trace status --install all)
+/tools/
+# Local scratch
+*.log
+__pycache__/
+.env
+# Test fixtures that check `.env` files are never read must be committed.
+!/tests/fixtures/**/.env
+# Local benchmark tooling and raw results; README figures stay tracked.
+/scripts/bench/
+/benches/
+/benchmarks/
+/benchmark-results/
+/artifacts/
+/docs/images/*.data.json

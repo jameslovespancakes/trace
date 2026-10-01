@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "language": "r",
+  "runtime": "R base and stats native leaves (.Internal / .Primitive / .External / .Call, implemented in C); every R-level function (lapply, Reduce, do.call, tryCatch, ...) is R code and derived, composing with these leaves",
+  "conventions": "Symbols are the native spelling as written in R source: .Internal(name) (positions are the inner call's arguments: .Internal(lapply(X, FUN)) -> FUN is pos 1), .Primitive(\"name\"), .External2(C_sym) / .External(C_sym) (positions are the outer call's arguments, pos 0 is the native symbol).",
+  "roots": [".Internal", ".Primitive", ".External", ".External2"],
+  "prelude": [],
+  "function_types": ["function", "closure"],
+  "top_types": ["ANY"],
+  "wrapper_types": [],
+  "data_types": [],
+  "entries": [
+    {"symbol": ".Internal(lapply)", "aliases": [".Internal(vapply)", ".Internal(rapply)", ".Internal(eapply)"], "kind": "function", "effects": [{"calls": {"pos": 1}}], "basis": "no_source",
+     "describe": ".Internal(lapply(X, FUN)) calls FUN on every element (vapply, rapply and eapply alike)", "why": "C implementation behind lapply/sapply/vapply/rapply/eapply: no R source"},
+    {"symbol": ".Internal(mapply)", "kind": "function", "effects": [{"calls": {"pos": 0}}], "basis": "no_source",
+     "describe": ".Internal(mapply(FUN, dots, MoreArgs)) calls FUN on the parallel elements (mapply, Map)", "why": "C implementation behind mapply/Map: no R source"},
+    {"symbol": ".Internal(do.call)", "kind": "function", "effects": [{"calls": {"pos": 0}}, {"calls": {"named_by": 0}}], "basis": "no_source",
+     "describe": ".Internal(do.call(what, args, envir)) calls what (a function or a function name) with args", "why": "C implementation behind do.call: no R source"},
+    {"symbol": ".Internal(reg.finalizer)", "kind": "function", "effects": [{"stored_then_called": {"pos": 1}}], "basis": "no_source",
+     "describe": ".Internal(reg.finalizer(e, f, onexit)) calls f when e is collected", "why": "C implementation behind reg.finalizer: no R source"},
+    {"symbol": ".Internal(makeActiveBinding)", "kind": "function", "effects": [{"property": {"pos": 1}}], "basis": "no_source",
+     "describe": ".Internal(makeActiveBinding(sym, fun, env)) calls fun on every access of the binding", "why": "C implementation behind makeActiveBinding: no R source"},
+    {"symbol": ".Internal(.addCondHands)", "kind": "function", "effects": [{"stored_then_called": {"pos": 1}}], "basis": "no_source",
+     "describe": ".Internal(.addCondHands(classes, handlers, ...)) installs condition handlers that run when a matching condition is signalled (tryCatch, withCallingHandlers)", "why": "C implementation of the condition system: no R source"},
+    {"symbol": ".Primitive(\"forceAndCall\")", "kind": "function", "effects": [{"calls": {"pos": 1}}], "basis": "no_source",
+     "describe": "forceAndCall(n, FUN, ...) calls FUN now", "why": "R primitive: implemented in C"},
+    {"symbol": ".Primitive(\"on.exit\")", "kind": "function", "effects": [{"stored_then_called": {"pos": 0}}], "basis": "no_source",
+     "describe": "on.exit(expr) evaluates expr when the calling function exits", "why": "R primitive: implemented in C"},
+    {"symbol": ".External2(C_optim)", "aliases": [".External2(C_optimhess)"], "kind": "function", "effects": [{"calls": {"pos": 2}}, {"calls": {"pos": 3}}], "basis": "no_source",
+     "describe": ".External2(C_optim, par, fn, gr, ...) calls fn and gr repeatedly (optim)", "why": "C implementation in the stats package: no R source"},
+    {"symbol": ".External2(C_do_fmin)", "aliases": [".External2(C_zeroin2)", ".External2(C_nlm)", ".External(C_call_dqags)", ".External(C_call_dqagi)"], "kind": "function", "effects": [{"calls": {"pos": 1}}], "basis": "no_source",
+     "describe": "the optimisers/root finders/integrators call their function argument repeatedly (optimize, uniroot, nlm, integrate)", "why": "C implementation in the stats package: no R source"}
+  ],
+  "io_send": [
+    {"symbol": ".Internal(system)", "channel": "process", "key": {"pos": 0}, "why_not_derivable": "compiled_runtime",
+     "describe": ".Internal(system(command, ...)) runs a shell command line (system and system2 derive down to it)"},
+    {"symbol": ".Internal(url)", "channel": "http", "key": {"pos": 0}, "verb": "GET", "why_not_derivable": "compiled_runtime",
+     "describe": ".Internal(url(description, ...)) opens a URL connection (url() and readLines(url) derive down to it)"},
+    {"symbol": ".Internal(download.file)", "channel": "http", "key": {"pos": 0}, "verb": "GET", "why_not_derivable": "compiled_runtime",
+     "describe": ".Internal(download.file(url, destfile, ...)) downloads url"}
+  ],
+  "ffi_conventions": [
+    {"symbol": ".Call", "channel": "ffi", "key": {"pos": 0}, "why_not_derivable": "language_spec", "describe": ".Call(name, ...) calls a registered or exported C routine by name"},
+    {"symbol": ".C", "channel": "ffi", "key": {"pos": 0}, "why_not_derivable": "language_spec", "describe": ".C(name, ...) calls a C routine by name"},
+    {"symbol": ".External", "channel": "ffi", "key": {"pos": 0}, "why_not_derivable": "language_spec", "describe": ".External(name, ...) calls a C routine by name"}
+  ],
+  "test_conventions": [
+    {"glob": "tests/testthat/test*.R", "activated_by": "testthat", "why_not_derivable": "reflection",
+     "describe": "testthat runs tests/testthat/test*.R files; test_that() bodies are run by the runner"}
+  ]
+}

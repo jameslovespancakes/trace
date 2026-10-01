@@ -1,0 +1,173 @@
+{
+  "schema": 2,
+  "backends": [
+    {
+      "id": "lsp:rust-analyzer",
+      "kind": "lsp",
+      "languages": [
+        "rust"
+      ],
+      "language_ids": [
+        "rust"
+      ],
+      "server": {
+        "name": "rust-analyzer",
+        "version": "2026-09-21",
+        "license": "MIT OR Apache-2.0"
+      },
+      "executable": {
+        "from": "tool",
+        "tool": "rust-analyzer",
+        "path": "rust-analyzer"
+      },
+      "env_set": {
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_TARGET_DIR": "{outside}/target",
+        "RUSTUP_AUTO_INSTALL": "0",
+        "RUSTUP_AUTO_SELF_UPDATE": "disable",
+        "CARGO_TERM_COLOR": "never",
+        "TEMP": "{tmp}",
+        "TMP": "{tmp}",
+        "TMPDIR": "{tmp}"
+      },
+      "initialization_options": {
+        "cargo": {
+          "buildScripts": {
+            "enable": "{json:ra_build}"
+          },
+          "noDeps": false,
+          "targetDir": "{outside}/target",
+          "sysroot": "{toolchain}",
+          "metadataExtraArgs": "{json:ra_metadata_args}",
+          "extraEnv": {
+            "CARGO_NET_OFFLINE": "true",
+            "CARGO_TARGET_DIR": "{outside}/target"
+          }
+        },
+        "procMacro": {
+          "enable": "{json:ra_build}"
+        },
+        "linkedProjects": "{json:ra_linked_projects}",
+        "checkOnSave": false,
+        "check": {
+          "workspace": false
+        },
+        "cachePriming": {
+          "enable": false
+        },
+        "diagnostics": {
+          "enable": false
+        },
+        "files": {
+          "watcher": "server"
+        }
+      },
+      "settings": {
+        "rust-analyzer": {
+          "cargo": {
+            "buildScripts": {
+              "enable": "{json:ra_build}"
+            },
+            "noDeps": false,
+            "targetDir": "{outside}/target",
+            "sysroot": "{toolchain}",
+            "metadataExtraArgs": "{json:ra_metadata_args}",
+            "extraEnv": {
+              "CARGO_NET_OFFLINE": "true",
+              "CARGO_TARGET_DIR": "{outside}/target"
+            }
+          },
+          "procMacro": {
+            "enable": "{json:ra_build}"
+          },
+          "linkedProjects": "{json:ra_linked_projects}",
+          "checkOnSave": false,
+          "check": {
+            "workspace": false
+          },
+          "cachePriming": {
+            "enable": false
+          },
+          "diagnostics": {
+            "enable": false
+          },
+          "files": {
+            "watcher": "server"
+          }
+        }
+      },
+      "workspace": {
+        "mode": "mirror",
+        "include_ignored": ["Cargo.lock"],
+        "exclude": [
+          "target/**"
+        ]
+      },
+      "ready": {
+        "kind": "quiescent"
+      },
+      "requires_build": {
+        "tool": "Cargo",
+        "runs": "this project's build scripts and procedural macros",
+        "when": "build_files"
+      },
+      "toolchain": {
+        "ecosystem": "rust",
+        "needs": "Rust",
+        "install": "Install it from https://rustup.rs"
+      },
+      "deps": {
+        "ecosystem": "rust"
+      },
+      "install": {
+        "id": "rust-analyzer",
+        "version": "2026-09-21",
+        "license": "MIT OR Apache-2.0",
+        "display": "Rust language server",
+        "product": "rust-analyzer",
+        "recipe": "archive",
+        "artifacts": [
+          {
+            "platform": "windows-x86_64",
+            "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-x86_64-pc-windows-msvc.zip",
+            "sha256": "f62a18aad35568fd9205006a62f97613eac8c4f2ec5fe43c830dde09684e5e6f"
+          },
+          {
+            "platform": "windows-aarch64",
+            "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-aarch64-pc-windows-msvc.zip",
+            "sha256": "2cfbd8fc8eb8f8232cc81eb338462abaf78081b4fda7a9fed91a6bf5b2f1ace0"
+          },
+          {
+            "platform": "linux-x86_64",
+            "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-x86_64-unknown-linux-gnu.gz",
+            "sha256": "b2d24ce2bda2ea05b1ad7c2917d205f8111775f703ccd908e6061803ae8257d0"
+          },
+          {
+            "platform": "linux-x86_64-musl",
+            "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-x86_64-unknown-linux-musl.gz",
+            "sha256": "ece8f431b4d3359755a8633308fcdc135d33e7922c4f6de14a3767507ef3c546"
+          },
+          {
+            "platform": "linux-aarch64",
+            "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-aarch64-unknown-linux-gnu.gz",
+            "sha256": "32a75657041a7a2ebf635c1e3968753e2639778b68dd4fb13c4b2584255f2ba8"
+          },
+          {
+            "platform": "macos-aarch64",
+            "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-aarch64-apple-darwin.gz",
+            "sha256": "eb474adfd12b6e66a6d0a7c25ed51210a64a0237f326f898e32e25164c9b11ad"
+          },
+          {
+            "platform": "macos-x86_64",
+            "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-x86_64-apple-darwin.gz",
+            "sha256": "1e2f706ee97d9f931ea36ed4e83f839efd0ac09870e18ec8350877d7b98ad8a0"
+          }
+        ],
+        "executables": [
+          "rust-analyzer"
+        ]
+      },
+      "safety": "Cargo loads the workspace in a mirror of the repository with CARGO_NET_OFFLINE=true (never a download), --locked when Cargo.lock exists, the target directory outside the mirror ({outside}/target), the user's toolchain named explicitly (CARGO / RUSTC absolute, RUSTUP_TOOLCHAIN, RUSTUP_AUTO_INSTALL=0: no toolchain install). Build scripts and procedural macros run only after trace index --allow-build (servers/rust.rs); check-on-save, cache priming and diagnostics off. The .gz artifacts are single gzip'd binaries (unpacked to the executable name)."
+    }
+  ]
+}

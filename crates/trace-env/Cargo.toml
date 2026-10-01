@@ -1,0 +1,21 @@
+[package]
+name = "trace-env"
+description = "Static detection of an inspected repository's toolchains and locally installed dependencies (project code never executed)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+trace-core.workspace = true
+trace-syntax.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+globset = "=0.4.20"
+blake3.workspace = true
+# Poetry shared-env directory names are urlsafe_b64(sha256(path))[:8].
+sha2 = "=0.10.9"
+
+[dev-dependencies]
+tempfile.workspace = true

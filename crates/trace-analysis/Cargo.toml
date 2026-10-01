@@ -1,0 +1,26 @@
+[package]
+name = "trace-analysis"
+description = "Index pipeline, search, uses (references, evidence, impact), find, deps, path and context packing for trace."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+trace-core.workspace = true
+trace-env.workspace = true
+trace-syntax.workspace = true
+trace-semantic.workspace = true
+trace-infer.workspace = true
+trace-bridge.workspace = true
+trace-library.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+postcard.workspace = true
+thiserror.workspace = true
+rayon.workspace = true
+blake3.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

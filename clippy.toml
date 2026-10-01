@@ -1,0 +1,5 @@
+# `trace_core::SetupError` carries the approved error texts of DESIGN §1.2 (up to five strings
+# per variant, e.g. ToolchainVersion) and is embedded in `SemanticError` / `AnalysisError`;
+# setup errors are cold paths (one per run), so an error type of up to 256 bytes is accepted
+# instead of boxing every setup error (clippy::result_large_err, default threshold 128).
+large-error-threshold = 256

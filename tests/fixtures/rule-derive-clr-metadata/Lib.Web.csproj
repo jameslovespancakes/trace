@@ -1,0 +1,11 @@
+<!-- Fixture (rule-derive-clr-metadata): builds Lib.Web.dll, kept as hex text in Lib.Web.dll.hex (dotnet build -c Release). -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Lib.Web</AssemblyName>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+</Project>

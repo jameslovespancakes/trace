@@ -1,0 +1,4 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App", "src\App\App.csproj", "{6F1D2C11-2B1B-4D2A-9C1B-000000000001}"
+EndProject

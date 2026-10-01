@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="64" viewBox="0 0 240 64" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">trace</title>
+  <desc id="desc">A connected path forming a lowercase t, beside a geometric trace wordmark.</desc>
+  <g stroke="#6366f1" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 12v28a10 10 0 0 0 10 10h8M12 24h32"/>
+  </g>
+  <g fill="#6366f1">
+    <circle cx="28" cy="12" r="4.5"/>
+    <circle cx="12" cy="24" r="4.5"/>
+    <circle cx="46" cy="50" r="4.5"/>
+  </g>
+  <g fill="#18181b">
+    <path d="M80 15h6v9h10v5H86v10c0 3 1.5 4.5 4.5 4.5H96V49h-6c-7 0-10-3.5-10-10V29h-6v-5h6Z"/>
+    <path d="M104 24h6v4c2-3 5-5 10-5h2v6h-3c-6 0-9 3.5-9 10v10h-6Z"/>
+    <path fill-rule="evenodd" d="M150 24h6v25h-6v-4c-2 3-6 5-10 5-8 0-13-5.6-13-13.5S132 23 140 23c4 0 8 2 10 5Zm-8.5 4.5c-5.5 0-8.5 3.3-8.5 8s3 8 8.5 8 8.5-3.3 8.5-8-3-8-8.5-8Z"/>
+    <path d="m189 27-4 4c-2-2-4-2.5-6.5-2.5-5 0-8.5 3.3-8.5 8s3.5 8 8.5 8c2.5 0 4.5-.8 6.5-2.8l4 3.8c-3 3-6.5 4.5-10.5 4.5-8.5 0-14.5-5.7-14.5-13.5S170 23 178.5 23c4 0 7.5 1.5 10.5 4Z"/>
+    <path fill-rule="evenodd" d="M222 37.5h-21c.5 4.5 3.5 7 8 7 3 0 5.5-1 7.5-3l3.5 3.8c-3 3.2-6.5 4.7-11.2 4.7-8.3 0-14.3-5.5-14.3-13.5 0-7.8 5.5-13.5 13.5-13.5 8.5 0 14 5.7 14 13ZM201 33h14.5c-.8-3.5-3.2-5-7.5-5-3.5 0-6 1.7-7 5Z"/>
+  </g>
+</svg>

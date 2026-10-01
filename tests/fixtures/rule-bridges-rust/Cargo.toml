@@ -1,0 +1,10 @@
+[package]
+name = "rule-bridges-rust"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+axum = "=0.7.5"
+reqwest = { version = "=0.12.4", features = ["blocking"] }
+tokio = { version = "1", features = ["full"] }

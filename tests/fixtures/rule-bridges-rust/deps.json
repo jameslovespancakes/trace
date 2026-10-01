@@ -1,0 +1,7 @@
+{
+  "packages": {
+    "cargo": []
+  },
+  "install": [["cargo", "fetch"]],
+  "expect": "ok"
+}

@@ -1,0 +1,307 @@
+name: Release
+
+# Releases are npm packages (@jameslovespancakes/trace + one package per platform), with
+# the same binaries attached to a GitHub release (archives, SHA256SUMS, build provenance).
+#
+#   Gate      the full CI (Lint, Test on every OS)
+#   Version   the tag must equal the workspace version in Cargo.toml
+#   Build     six targets: Windows x64 / ARM64, Linux x64 / ARM64 (static), macOS ARM64 / x64
+#   Publish   npm (provenance) and the GitHub release, in parallel
+#   Summary   what was released and how to install it
+#
+# Only a pushed tag `vMAJOR.MINOR.PATCH[-PRERELEASE]` publishes. A manual run (Actions ->
+# Release -> Run workflow) is a dry run: it builds and packs everything and publishes nothing.
+# A prerelease (`v0.9.0-beta.1`) is published under the npm tag `next`, and also as `latest`
+# while no stable version exists.
+#
+# Secrets: NPM_TOKEN (npm granular access token with publish rights to the scope). Code
+# signing is optional and runs only when its secrets exist:
+#   Windows: AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, TRUSTED_SIGNING_ENDPOINT,
+#            TRUSTED_SIGNING_ACCOUNT, TRUSTED_SIGNING_PROFILE
+#   macOS:   APPLE_CERTIFICATE_P12, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
+#            APPLE_ID, APPLE_TEAM_ID, APPLE_APP_PASSWORD
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_TOOLCHAIN: "1.92.0"
+
+jobs:
+  gate:
+    name: CI
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/ci.yml
+
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+      publish: ${{ steps.v.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        shell: bash
+        run: |
+          crate=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "trace-cli") | .version')
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+            if [ "$version" != "$crate" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match the workspace version $crate in Cargo.toml."
+              exit 1
+            fi
+            publish=true
+          else
+            version="$crate-dev.$GITHUB_RUN_NUMBER"
+            publish=false
+          fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::$version is not MAJOR.MINOR.PATCH[-PRERELEASE]."
+            exit 1
+          fi
+          case "$version" in *-*) prerelease=true ;; *) prerelease=false ;; esac
+          {
+            echo "version=$version"
+            echo "prerelease=$prerelease"
+            echo "publish=$publish"
+          } >> "$GITHUB_OUTPUT"
+          echo "Version $version (prerelease: $prerelease, publish: $publish)" >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: [gate, version]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Windows x64, os: windows-latest, target: x86_64-pc-windows-msvc, archive: zip }
+          - { name: Windows ARM64, os: windows-11-arm, target: aarch64-pc-windows-msvc, archive: zip }
+          # Static musl binaries run on every Linux distribution (Alpine included).
+          - { name: Linux x64, os: ubuntu-latest, target: x86_64-unknown-linux-musl, archive: tar.gz }
+          - { name: Linux ARM64, os: ubuntu-24.04-arm, target: aarch64-unknown-linux-musl, archive: tar.gz }
+          - { name: macOS ARM64, os: macos-14, target: aarch64-apple-darwin, archive: tar.gz }
+          - { name: macOS x64, os: macos-14, target: x86_64-apple-darwin, archive: tar.gz }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      # Secrets are not allowed in `if:`; these flags decide whether signing can run.
+      WINDOWS_SIGNING: ${{ secrets.AZURE_CLIENT_ID != '' }}
+      MACOS_SIGNING: ${{ secrets.APPLE_CERTIFICATE_P12 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: ${{ matrix.target }}
+      - name: musl C toolchain
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - name: Build
+        shell: bash
+        run: |
+          if [[ "${{ matrix.target }}" == *windows-msvc ]]; then
+            export RUSTFLAGS="-C target-feature=+crt-static"
+          fi
+          cargo build --release --locked --target "${{ matrix.target }}" -p trace-cli
+
+      - name: Sign (Windows Authenticode)
+        if: contains(matrix.target, 'windows') && env.WINDOWS_SIGNING == 'true'
+        uses: azure/trusted-signing-action@v0.5.1
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.TRUSTED_SIGNING_PROFILE }}
+          files-folder: target/${{ matrix.target }}/release
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Sign and notarize (macOS Developer ID)
+        if: contains(matrix.target, 'apple') && env.MACOS_SIGNING == 'true'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          security create-keychain -p "$GITHUB_RUN_ID" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$GITHUB_RUN_ID" "$keychain"
+          echo "$APPLE_CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -d user -s "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$GITHUB_RUN_ID" "$keychain"
+          bin="target/${{ matrix.target }}/release/trace"
+          codesign --force --options runtime --timestamp --sign "$APPLE_SIGNING_IDENTITY" "$bin"
+          ditto -c -k --keepParent "$bin" "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" --apple-id "$APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
+          rm -f "$RUNNER_TEMP/cert.p12"
+
+      - name: Package
+        shell: bash
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          bin="target/${{ matrix.target }}/release/trace"
+          if [[ "${{ matrix.target }}" == *windows* ]]; then bin="$bin.exe"; fi
+          # Raw binary for the npm platform package.
+          mkdir -p npm-bin
+          cp "$bin" npm-bin/
+          # Archive for the GitHub release.
+          name="trace-v${VERSION}-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          cp "$bin" LICENSE README.md "dist/$name/"
+          cd dist
+          if [ "${{ matrix.archive }}" = "zip" ]; then
+            7z a -tzip "$name.zip" "$name" > /dev/null
+          else
+            tar czf "$name.tar.gz" "$name"
+          fi
+          rm -rf "$name"
+          signed=true
+          case "${{ matrix.target }}" in
+            *windows*) [ "$WINDOWS_SIGNING" = "true" ] || signed=false ;;
+            *apple*) [ "$MACOS_SIGNING" = "true" ] || signed=false ;;
+          esac
+          if [ "$signed" = "false" ]; then
+            echo "::notice::${{ matrix.name }} is not code-signed (signing secrets not configured)."
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ matrix.target }}
+          path: npm-bin/*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: archive-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  npm:
+    name: Publish (npm)
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bin-*
+          path: npm-bin
+      - name: Pack
+        run: node .github/npm/scripts/pack.mjs --version "${{ needs.version.outputs.version }}" --binaries npm-bin --out npm-out
+      - name: Publish
+        if: needs.version.outputs.publish == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node .github/npm/scripts/publish.mjs npm-out --tag "${{ needs.version.outputs.prerelease == 'true' && 'next' || 'latest' }}"
+      - name: Publish (dry run)
+        if: needs.version.outputs.publish != 'true'
+        run: node .github/npm/scripts/publish.mjs npm-out --dry-run
+
+  github:
+    name: Publish (GitHub)
+    needs: [version, build]
+    if: needs.version.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: archive-*
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum * > SHA256SUMS
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: dist/*
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+          PRERELEASE: ${{ needs.version.outputs.prerelease }}
+        run: |
+          package=$(node -p "require('./.github/npm/trace/package.json').name")
+          {
+            echo "Install:"
+            echo
+            echo '```'
+            echo "npm install -g ${package}@${VERSION}"
+            echo '```'
+            echo
+            echo "The archives below hold the same binaries (SHA256SUMS, build provenance)."
+          } > notes.md
+          flags=()
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" \
+            --title "trace $VERSION" --notes-file notes.md --generate-notes "${flags[@]}"
+
+  summary:
+    name: Summary
+    needs: [version, build, npm, github]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Summary
+        shell: bash
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          VERSION: ${{ needs.version.outputs.version }}
+          PUBLISH: ${{ needs.version.outputs.publish }}
+        run: |
+          package=$(node -p "require('./.github/npm/trace/package.json').name")
+          {
+            if [ "$PUBLISH" = "true" ]; then echo "## Released trace $VERSION"; else echo "## Dry run $VERSION (nothing published)"; fi
+            echo
+            echo "| Stage | Result |"
+            echo "| --- | --- |"
+            echo "$NEEDS" | jq -r 'to_entries[] | "| \(.key) | \(.value.result) |"'
+            echo
+            if [ "$PUBLISH" = "true" ]; then
+              echo '```'
+              echo "npm install -g ${package}@${VERSION}"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "$NEEDS" | jq -e 'all(.[]; .result == "success" or .result == "skipped")' > /dev/null
